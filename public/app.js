@@ -156,8 +156,8 @@ async function sendMessage() {
     const botMsgId = appendMessage("bot", "", false, true);
 
     try {
-        // 3. Open SSE stream to /api/chat
-        const response = await fetch('/api/chat', {
+        // 3. Open SSE stream directly to the Railway backend
+        const response = await fetch('https://gravity-claw-production.up.railway.app/api/chat', {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
