@@ -16,5 +16,11 @@
             "path": "/api/smart-recommendations",
             "schedule": "0 22 * * 1-5"
         }
+    ],
+    "rewrites": [
+        {
+            "source": "/api/chat",
+            "destination": "https://gravity-claw-production.up.railway.app/api/chat"
+        }
     ]
 }
