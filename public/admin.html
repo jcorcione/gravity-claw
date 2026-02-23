@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Admin UI</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Nexus Admin</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-target="dashboard">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="#" class="nav-item" data-target="campaigns">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                        <line x1="4" y1="22" x2="4" y2="15"></line>
+                    </svg>
+                    Campaigns
+                </a>
+                <a href="#" class="nav-item" data-target="tasks">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    Tasks & Cron
+                </a>
+                <a href="#" class="nav-item" id="nav-chat">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    Open Chat UI
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logout-btn" class="logout-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Sign Out
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <!-- Dashboard View -->
+            <section id="view-dashboard" class="content-view active">
+                <header class="content-header">
+                    <h1>System Status</h1>
+                    <div class="user-info">Super User Access</div>
+                </header>
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <h3>Total Users</h3>
+                        <div class="stat-value" id="stat-users">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Supabase Storage</h3>
+                        <div class="stat-value" id="stat-db">-- MB</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Pinecone Vectors</h3>
+                        <div class="stat-value" id="stat-vectors">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Active Schedules</h3>
+                        <div class="stat-value" id="stat-schedules">--</div>
+                    </div>
+                </div>
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h2>Nexus Chat Interaction</h2>
+                        <button id="dashboard-chat-btn" class="primary-btn">Launch Chat Experience</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Campaigns View -->
+            <section id="view-campaigns" class="content-view">
+                <header class="content-header">
+                    <h1>Lead Generation Campaigns</h1>
+                </header>
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Recruiter Scanner</h2>
+                        <button id="run-scan-btn" class="primary-btn">Run Scan Now</button>
+                    </div>
+                    <div class="card-body">
+                        <p>Manually trigger the unread email scanner to find job boards and recruiters, generate draft
+                            replies, and update tracking sheets.</p>
+                        <div id="scan-results" class="results-container" style="display: none;">
+                            <div class="loader"></div> Processing Scan...
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tasks View -->
+            <section id="view-tasks" class="content-view">
+                <header class="content-header">
+                    <h1>Tasks & Automation</h1>
+                </header>
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Morning Briefing</h2>
+                        <button id="run-briefing-btn" class="secondary-btn">Trigger Briefing</button>
+                    </div>
+                    <div class="card-body">
+                        <p>Gather today's calendar events, news, and unread emails, and dispatch a summary directly to
+                            the admin Telegram channel.</p>
+                    </div>
+                </div>
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h2>Smart Recommendations</h2>
+                        <button id="run-recommend-btn" class="secondary-btn">Trigger Recommendations</button>
+                    </div>
+                    <div class="card-body">
+                        <p>Analyze upcoming events and unread messages to propose proactive actions.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Admin Initialization gate -->
+    <div id="admin-auth-gate" class="active">
+        <div class="auth-box">
+            <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                </svg>
+            </div>
+            <h2>Admin Portal</h2>
+            <div id="login-form">
+                <input type="email" id="admin-email" placeholder="Super User Email" autocomplete="email"
+                    class="auth-input">
+                <input type="password" id="admin-password" placeholder="Password" autocomplete="current-password"
+                    class="auth-input">
+                <button id="admin-login-btn" class="auth-btn">AUTHORIZE</button>
+            </div>
+            <div id="auth-error" class="error-msg"></div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+
+</html>

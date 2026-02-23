@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus AI — Service Command</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts for a sleek modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Security Gate -->
+    <div id="auth-gate" class="active">
+        <div class="auth-box">
+            <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+            </div>
+            <!-- Login Form -->
+            <div id="login-form">
+                <input type="email" id="login-email" placeholder="Email Address" autocomplete="email"
+                    class="auth-input">
+                <input type="password" id="login-password" placeholder="Password" autocomplete="current-password"
+                    class="auth-input">
+                <button id="login-btn" class="auth-btn">SIGN IN</button>
+                <p class="toggle-auth">Need an account? <span id="show-register">Register here</span></p>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-form" style="display: none;">
+                <input type="text" id="reg-name" placeholder="Full Name" autocomplete="name" class="auth-input">
+                <input type="email" id="reg-email" placeholder="Email Address" autocomplete="email" class="auth-input">
+                <input type="password" id="reg-password" placeholder="Create Password" autocomplete="new-password"
+                    class="auth-input">
+                <button id="register-btn" class="auth-btn">CREATE ACCOUNT</button>
+                <p class="toggle-auth">Already have an account? <span id="show-login">Sign in</span></p>
+            </div>
+
+            <div id="auth-error"></div>
+            <div style="margin-top: 20px; border-top: 1px solid var(--border-dim); padding-top: 10px;">
+                <a href="admin.html" style="color: var(--text-muted); font-size: 0.8rem; text-decoration: none;">🔒
+                    Admin Use Only</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chat Interface (Hidden initially) -->
+    <div id="chat-app">
+        <header>
+            <div class="header-content">
+                <div class="status-indicator"></div>
+                <h2>Nexus AI</h2>
+                <button id="logout-btn"
+                    style="background:var(--bg-secondary); color:var(--text-secondary); border:1px solid var(--border-color); padding:4px 8px; border-radius:4px; font-size:12px; cursor:pointer;">Sign
+                    Out</button>
+            </div>
+        </header>
+
+        <main id="chat-window">
+            <div class="message system-msg">
+                <div class="msg-content">
+                    Identity verified. Nexus AI is online and ready for operations.
+                </div>
+            </div>
+            <!-- Dynamic messages will be appended here -->
+        </main>
+
+        <div class="input-area">
+            <textarea id="prompt-input" placeholder="Message Nexus..." rows="1"></textarea>
+            <button id="send-btn" title="Send (Enter)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+        <div class="legal-footer">
+            &copy; 2026 Nexus AI Solutions. All Rights Reserved. Proprietary & Confidential. <a href="#">Terms of
+                Service</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

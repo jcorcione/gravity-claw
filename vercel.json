@@ -1,0 +1,20 @@
+{
+    "crons": [
+        {
+            "path": "/api/email-scan",
+            "schedule": "30 14 * * 1-5"
+        },
+        {
+            "path": "/api/email-scan",
+            "schedule": "0 20 * * 1-5"
+        },
+        {
+            "path": "/api/morning-briefing",
+            "schedule": "0 12 * * 1-5"
+        },
+        {
+            "path": "/api/smart-recommendations",
+            "schedule": "0 22 * * 1-5"
+        }
+    ]
+}
