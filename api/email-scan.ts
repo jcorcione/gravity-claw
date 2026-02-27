@@ -15,7 +15,7 @@ import { VercelRequest, VercelResponse } from "@vercel/node";
 import { classifyEmail, extractJobDetails } from "../src/email-classifier.js";
 import { generateCoverLetter } from "../src/cover-letter.js";
 import { appendDraftLog, ensureSheetHeaders } from "../src/sheets.js";
-import { initMcpServers, getMcpTools } from "../src/mcp.js";
+import { google } from "googleapis";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -59,16 +59,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     };
 
     try {
-        // 1. Ensure MCP Server is booted for this serverless function run
-        await initMcpServers();
-        const tools = getMcpTools();
-        const searchTool = tools.find(t => t.name === "mcp_gmail_gmail_list_messages");
-        const readTool = tools.find(t => t.name === "mcp_gmail_gmail_get_message");
-        const updateTool = tools.find(t => t.name === "mcp_gmail_gmail_modify_message");
-
-        if (!searchTool || !readTool || !updateTool) {
-            throw new Error("Gmail MCP tools not found. Check MCP_SERVERS config.");
+        // Initialize direct Gmail API fallback since MCP is failing
+        if (!process.env.GMAIL_CREDENTIALS_JSON || !process.env.GMAIL_TOKEN_JSON) {
+            throw new Error("Missing GMAIL_CREDENTIALS_JSON or GMAIL_TOKEN_JSON environment variables for Gmail fallback.");
         }
+
+        const credentials = JSON.parse(process.env.GMAIL_CREDENTIALS_JSON);
+        const token = JSON.parse(process.env.GMAIL_TOKEN_JSON);
+
+        const { client_secret, client_id, redirect_uris } = credentials.installed || credentials.web;
+        const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
+        oAuth2Client.setCredentials(token);
+
+        const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
 
         // 2. Ensure Google Sheet has headers
         try {
@@ -77,21 +80,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             console.warn("[Email Scan] Could not ensure sheet headers:", e);
         }
 
-        // 3. Fetch unread emails
-        let searchResultRaw;
-        try {
-            const context = { userId: "default_user" };
-            searchResultRaw = await searchTool.execute({ q: "is:unread in:inbox", max_results: 50 }, context);
-        } catch (e: any) {
-            throw new Error(`Error fetching emails via MCP: ${e.message}`);
-        }
+        // 3. Fetch unread emails directly
+        const searchRes = await gmail.users.messages.list({
+            userId: 'me',
+            q: "is:unread in:inbox",
+            maxResults: 50
+        });
 
-        let messages = [];
-        try {
-            messages = typeof searchResultRaw === "string" ? JSON.parse(searchResultRaw) : searchResultRaw;
-        } catch (e) { }
+        const messages = searchRes.data.messages || [];
 
-        if (!messages || messages.length === 0) {
+        if (messages.length === 0) {
             const msg = `📬 *Email Scan Complete* — No new unread emails found.`;
             await sendTelegram(msg);
             return res.status(200).json({ ok: true, ...results });
@@ -100,32 +98,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         results.scanned = messages.length;
         console.log(`[Email Scan] Found ${messages.length} unread emails.`);
 
-        const context = { userId: "default_user" };
-
         // 4. Process each email
         for (const msg of messages) {
-            const emailId = msg.id || msg.messageId;
+            const emailId = msg.id;
             if (!emailId) continue;
 
             try {
-                const contentRaw = await readTool.execute({ id: emailId, format: "full" }, context);
-                let contentData;
-                try {
-                    contentData = typeof contentRaw === "string" ? JSON.parse(contentRaw) : contentRaw;
-                } catch { continue; }
+                const messageData = await gmail.users.messages.get({
+                    userId: 'me',
+                    id: emailId,
+                    format: 'full'
+                });
 
-                const fromHeader = contentData.headers?.From || contentData.from || "";
-                const subjectHeader = contentData.headers?.Subject || contentData.subject || "";
+                const headers = messageData.data.payload?.headers || [];
+                const fromHeader = headers.find(h => h.name === 'From')?.value || '';
+                const subjectHeader = headers.find(h => h.name === 'Subject')?.value || '';
+                const dateHeader = headers.find(h => h.name === 'Date')?.value || new Date().toISOString();
+
+                // Simplify body extraction for text/plain or HTML
+                let body = "";
+                if (messageData.data.payload?.parts) {
+                    const textPart = messageData.data.payload.parts.find(p => p.mimeType === 'text/plain');
+                    if (textPart && textPart.body?.data) {
+                        body = Buffer.from(textPart.body.data, 'base64').toString('utf8');
+                    }
+                } else if (messageData.data.payload?.body?.data) {
+                    body = Buffer.from(messageData.data.payload.body.data, 'base64').toString('utf8');
+                }
 
                 const email = {
                     id: emailId,
-                    threadId: contentData.threadId || emailId,
+                    threadId: messageData.data.threadId || emailId,
                     from: fromHeader,
                     fromEmail: fromHeader.match(/<(.+)>/)?.[1] || fromHeader,
                     subject: subjectHeader,
-                    snippet: contentData.snippet || "",
-                    body: contentData.textBody || contentData.body || "",
-                    date: contentData.headers?.Date || contentData.date || new Date().toISOString()
+                    snippet: messageData.data.snippet || "",
+                    body: body,
+                    date: dateHeader
                 };
 
                 const classification = classifyEmail(email);
@@ -134,7 +143,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 if (classification.category === "job-board") {
                     results.jobBoard++;
                     // Remove INBOX and UNREAD labels (effectively archiving)
-                    await updateTool.execute({ id: emailId, remove_label_ids: ["INBOX", "UNREAD"] }, context);
+                    await gmail.users.messages.modify({
+                        userId: 'me',
+                        id: emailId,
+                        requestBody: { removeLabelIds: ['INBOX', 'UNREAD'] }
+                    });
 
                 } else if (classification.category === "recruiter") {
                     results.recruiter++;
@@ -152,12 +165,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     });
 
                     // Mark as read
-                    await updateTool.execute({ id: emailId, remove_label_ids: ["UNREAD"] }, context);
+                    await gmail.users.messages.modify({
+                        userId: 'me',
+                        id: emailId,
+                        requestBody: { removeLabelIds: ['UNREAD'] }
+                    });
                     results.drafts.push(`• *${role}* at ${company} (${recruiterName})`);
 
                 } else {
                     results.other++;
-                    await updateTool.execute({ id: emailId, remove_label_ids: ["UNREAD"] }, context);
+                    await gmail.users.messages.modify({
+                        userId: 'me',
+                        id: emailId,
+                        requestBody: { removeLabelIds: ['UNREAD'] }
+                    });
                 }
 
             } catch (emailErr: any) {

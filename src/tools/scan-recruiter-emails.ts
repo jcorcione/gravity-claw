@@ -2,7 +2,7 @@ import type { Tool } from "./index.js";
 import { classifyEmail, extractJobDetails } from "../email-classifier.js";
 import { generateCoverLetter } from "../cover-letter.js";
 import { appendDraftLog, ensureSheetHeaders } from "../sheets.js";
-import { getMcpTools } from "../mcp.js";
+import { google } from "googleapis";
 
 interface EmailSummary {
     id: string;
@@ -28,14 +28,18 @@ export const scanRecruiterEmailsTool: Tool = {
         }
     },
     execute: async (input, context) => {
-        const tools = getMcpTools();
-        const searchTool = tools.find(t => t.name === "mcp_gmail_gmail_list_messages");
-        const readTool = tools.find(t => t.name === "mcp_gmail_gmail_get_message");
-        const updateTool = tools.find(t => t.name === "mcp_gmail_gmail_modify_message");
-
-        if (!searchTool || !readTool || !updateTool) {
-            return "Error: Gmail MCP tools are not fully loaded or connected. Ensure the Gmail MCP server is running.";
+        if (!process.env.GMAIL_CREDENTIALS_JSON || !process.env.GMAIL_TOKEN_JSON) {
+            return "Error: Missing GMAIL_CREDENTIALS_JSON or GMAIL_TOKEN_JSON for Gmail fallback.";
         }
+
+        const credentials = JSON.parse(process.env.GMAIL_CREDENTIALS_JSON);
+        const token = JSON.parse(process.env.GMAIL_TOKEN_JSON);
+
+        const { client_secret, client_id, redirect_uris } = credentials.installed || credentials.web;
+        const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
+        oAuth2Client.setCredentials(token);
+
+        const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
 
         const maxEmails = (input.maxEmails as number) || 20;
 
@@ -45,27 +49,20 @@ export const scanRecruiterEmailsTool: Tool = {
             console.warn("Could not ensure sheet headers:", e);
         }
 
-        let searchResultRaw;
+        let searchRes;
         try {
-            searchResultRaw = await searchTool.execute({ q: "is:unread in:inbox", max_results: maxEmails }, context);
+            searchRes = await gmail.users.messages.list({
+                userId: 'me',
+                q: "is:unread in:inbox",
+                maxResults: maxEmails
+            });
         } catch (e: any) {
-            return `Error fetching emails via MCP: ${e.message}`;
+            return `Error fetching emails via Gmail API: ${e.message}`;
         }
 
-        // Output of gmail_search_emails is usually a stringified JSON array
-        let messages = [];
-        try {
-            if (typeof searchResultRaw === "string") {
-                messages = JSON.parse(searchResultRaw);
-            } else {
-                messages = searchResultRaw as any[];
-            }
-        } catch (e) {
-            // If it's pure text, try to extract IDs
-            return `Failed to parse search results from MCP: ${searchResultRaw}`;
-        }
+        const messages = searchRes.data.messages || [];
 
-        if (!messages || messages.length === 0) {
+        if (messages.length === 0) {
             return "Scan complete. No unread emails found in inbox.";
         }
 
@@ -74,44 +71,53 @@ export const scanRecruiterEmailsTool: Tool = {
         let archived = 0;
 
         for (const msg of messages) {
-            const emailId = msg.id || msg.messageId; // different MCPs might use different keys
+            const emailId = msg.id;
             if (!emailId) continue;
 
             try {
-                // Read full content to classify
-                const contentRaw = await readTool.execute({ id: emailId, format: "full" }, context);
-                let contentData;
+                const messageData = await gmail.users.messages.get({
+                    userId: 'me',
+                    id: emailId,
+                    format: 'full'
+                });
 
-                try {
-                    contentData = typeof contentRaw === "string" ? JSON.parse(contentRaw) : contentRaw;
-                } catch {
-                    continue; // Skip if we can't parse
+                const headers = messageData.data.payload?.headers || [];
+                const fromHeader = headers.find(h => h.name === 'From')?.value || '';
+                const subjectHeader = headers.find(h => h.name === 'Subject')?.value || '';
+                const dateHeader = headers.find(h => h.name === 'Date')?.value || new Date().toISOString();
+
+                let body = "";
+                if (messageData.data.payload?.parts) {
+                    const textPart = messageData.data.payload.parts.find(p => p.mimeType === 'text/plain');
+                    if (textPart && textPart.body?.data) {
+                        body = Buffer.from(textPart.body.data, 'base64').toString('utf8');
+                    }
+                } else if (messageData.data.payload?.body?.data) {
+                    body = Buffer.from(messageData.data.payload.body.data, 'base64').toString('utf8');
                 }
-
-                // Normalizing to our internal EmailSummary type for the existing codebase functions
-                const fromHeader = contentData.headers?.From || contentData.from || "";
-                const subjectHeader = contentData.headers?.Subject || contentData.subject || "";
 
                 const email: EmailSummary = {
                     id: emailId,
-                    threadId: contentData.threadId || emailId,
+                    threadId: messageData.data.threadId || emailId,
                     from: fromHeader,
                     fromEmail: fromHeader.match(/<(.+)>/)?.[1] || fromHeader,
                     subject: subjectHeader,
-                    snippet: contentData.snippet || "",
-                    body: contentData.textBody || contentData.body || "",
-                    date: contentData.headers?.Date || contentData.date || new Date().toISOString()
+                    snippet: messageData.data.snippet || "",
+                    body: body,
+                    date: dateHeader
                 };
 
                 const classification = classifyEmail(email);
 
                 if (classification.category === "job-board") {
-                    // Archive
-                    await updateTool.execute({ id: emailId, remove_label_ids: ["INBOX", "UNREAD"] }, context);
+                    await gmail.users.messages.modify({
+                        userId: 'me',
+                        id: emailId,
+                        requestBody: { removeLabelIds: ['INBOX', 'UNREAD'] }
+                    });
                     archived++;
                     summary += `🗑️ Archived Job Board: ${email.subject}\n`;
                 } else if (classification.category === "recruiter") {
-                    // Generate draft
                     const { company, role, recruiterName } = extractJobDetails(email);
                     const draft = await generateCoverLetter(email, role, company);
 
@@ -125,13 +131,19 @@ export const scanRecruiterEmailsTool: Tool = {
                         status: "Draft",
                     });
 
-                    // Mark as read
-                    await updateTool.execute({ id: emailId, remove_label_ids: ["UNREAD"] }, context);
+                    await gmail.users.messages.modify({
+                        userId: 'me',
+                        id: emailId,
+                        requestBody: { removeLabelIds: ['UNREAD'] }
+                    });
                     drafts++;
                     summary += `✍️ Drafted Cover Letter: ${role} at ${company} (${recruiterName})\n`;
                 } else {
-                    // Other - just mark as read
-                    await updateTool.execute({ id: emailId, remove_label_ids: ["UNREAD"] }, context);
+                    await gmail.users.messages.modify({
+                        userId: 'me',
+                        id: emailId,
+                        requestBody: { removeLabelIds: ['UNREAD'] }
+                    });
                 }
 
             } catch (e: any) {
