@@ -139,6 +139,26 @@ export async function initMcpServers(): Promise<void> {
     const raw = process.env["MCP_SERVERS"];
     if (!raw) return;
 
+    if (process.env.GMAIL_CREDENTIALS_JSON) {
+        try {
+            const fs = await import("fs");
+            fs.writeFileSync("credentials.json", process.env.GMAIL_CREDENTIALS_JSON, "utf-8");
+            console.log("  🔐 Wrote credentials.json from env");
+        } catch (e) {
+            console.error("  ❌ Failed to write credentials.json:", e);
+        }
+    }
+
+    if (process.env.GMAIL_TOKEN_JSON) {
+        try {
+            const fs = await import("fs");
+            fs.writeFileSync("token.json", process.env.GMAIL_TOKEN_JSON, "utf-8");
+            console.log("  🔐 Wrote token.json from env");
+        } catch (e) {
+            console.error("  ❌ Failed to write token.json:", e);
+        }
+    }
+
     try {
         const configs: McpServerConfig[] = JSON.parse(raw);
         for (const config of configs) {

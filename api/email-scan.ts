@@ -62,9 +62,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // 1. Ensure MCP Server is booted for this serverless function run
         await initMcpServers();
         const tools = getMcpTools();
-        const searchTool = tools.find(t => t.name === "mcp_gmail_gmail_search_emails");
-        const readTool = tools.find(t => t.name === "mcp_gmail_gmail_read_email_content");
-        const updateTool = tools.find(t => t.name === "mcp_gmail_gmail_update_email_labels");
+        const searchTool = tools.find(t => t.name === "mcp_gmail_gmail_list_messages");
+        const readTool = tools.find(t => t.name === "mcp_gmail_gmail_get_message");
+        const updateTool = tools.find(t => t.name === "mcp_gmail_gmail_modify_message");
 
         if (!searchTool || !readTool || !updateTool) {
             throw new Error("Gmail MCP tools not found. Check MCP_SERVERS config.");
@@ -81,7 +81,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         let searchResultRaw;
         try {
             const context = { userId: "default_user" };
-            searchResultRaw = await searchTool.execute({ query: "is:unread in:inbox", maxResults: 50 }, context);
+            searchResultRaw = await searchTool.execute({ q: "is:unread in:inbox", max_results: 50 }, context);
         } catch (e: any) {
             throw new Error(`Error fetching emails via MCP: ${e.message}`);
         }
@@ -108,7 +108,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             if (!emailId) continue;
 
             try {
-                const contentRaw = await readTool.execute({ messageId: emailId, format: "full" }, context);
+                const contentRaw = await readTool.execute({ id: emailId, format: "full" }, context);
                 let contentData;
                 try {
                     contentData = typeof contentRaw === "string" ? JSON.parse(contentRaw) : contentRaw;
@@ -134,7 +134,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 if (classification.category === "job-board") {
                     results.jobBoard++;
                     // Remove INBOX and UNREAD labels (effectively archiving)
-                    await updateTool.execute({ messageId: emailId, removeLabels: ["INBOX", "UNREAD"] }, context);
+                    await updateTool.execute({ id: emailId, remove_label_ids: ["INBOX", "UNREAD"] }, context);
 
                 } else if (classification.category === "recruiter") {
                     results.recruiter++;
@@ -152,12 +152,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     });
 
                     // Mark as read
-                    await updateTool.execute({ messageId: emailId, removeLabels: ["UNREAD"] }, context);
+                    await updateTool.execute({ id: emailId, remove_label_ids: ["UNREAD"] }, context);
                     results.drafts.push(`• *${role}* at ${company} (${recruiterName})`);
 
                 } else {
                     results.other++;
-                    await updateTool.execute({ messageId: emailId, removeLabels: ["UNREAD"] }, context);
+                    await updateTool.execute({ id: emailId, remove_label_ids: ["UNREAD"] }, context);
                 }
 
             } catch (emailErr: any) {
