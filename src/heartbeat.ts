@@ -24,9 +24,11 @@ const BRIEFING_PROMPT = `You are running a proactive morning briefing. The user 
 DO THIS:
 1. Use get_current_time to check the current time and day.
 2. Use search_memory to find any relevant memories (preferences, tasks, events, reminders).
-3. Compose a brief, friendly morning message that includes:
+3. Use check_openrouter_balance to see your remaining AI funds.
+4. Compose a brief, friendly morning message that includes:
    - A greeting with the day/date
    - Any relevant reminders from memory
+   - Your remaining OpenRouter balance (only if it's getting low!)
    - Something useful or encouraging
 
 Keep it SHORT — 3-5 sentences max. This is a quick check-in, not an essay.
