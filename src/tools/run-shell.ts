@@ -100,7 +100,7 @@ export const runShellTool: Tool = {
                 cwd,
                 timeout: TIMEOUT_MS,
                 maxBuffer: 1024 * 1024, // 1MB buffer
-                shell: process.platform === "win32" ? "powershell.exe" : "/bin/bash",
+                shell: process.platform === "win32" ? "powershell.exe" : "/bin/sh",
             });
 
             const output = stdout.trim();
