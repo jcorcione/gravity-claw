@@ -1,6 +1,5 @@
 import { config } from "./config.js";
 import OpenAI from "openai";
-import { InputFile } from "grammy";
 
 // ─── State ───────────────────────────────────────────────
 
@@ -66,7 +65,7 @@ export async function transcribe(
 
 // ─── Synthesize (TTS) ────────────────────────────────────
 
-export async function synthesize(text: string): Promise<InputFile> {
+export async function synthesize(text: string): Promise<Buffer> {
     if (!config.elevenLabsApiKey) {
         throw new Error("ELEVENLABS_API_KEY not configured");
     }
@@ -99,7 +98,5 @@ export async function synthesize(text: string): Promise<InputFile> {
     }
 
     const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    return new InputFile(buffer, "response.mp3");
+    return Buffer.from(arrayBuffer);
 }

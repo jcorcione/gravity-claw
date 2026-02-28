@@ -1,4 +1,4 @@
-import { Bot } from "grammy";
+import { Bot, InputFile } from "grammy";
 import { config } from "./config.js";
 import { runAgentLoop } from "./agent.js";
 import {
@@ -262,7 +262,7 @@ async function sendResponse(ctx: any, text: string, withVoice: boolean): Promise
             console.log(`  🔊 Synthesizing voice...`);
             await ctx.replyWithChatAction("upload_voice");
             const audio = await synthesize(text);
-            await ctx.replyWithVoice(audio);
+            await ctx.replyWithVoice(new InputFile(audio, "response.mp3"));
             console.log(`  🔊 Voice reply sent`);
         } catch (err) {
             console.error("  ⚠️ TTS failed (text reply was still sent):", err);

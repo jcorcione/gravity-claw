@@ -6,6 +6,7 @@ import { canTranscribe, canSynthesize } from "./voice.js";
 import { initMcpServers, disconnectAll, getMcpTools } from "./mcp.js";
 import { initHeartbeat, stopAllJobs } from "./heartbeat.js";
 import { initPinecone } from "./pinecone.js";
+import { startDiscordBot, stopDiscordBot } from "./discord.js";
 
 // ─── Banner ──────────────────────────────────────────────
 
@@ -66,11 +67,15 @@ bot.start({
     },
 });
 
+console.log(`\n🚀 Starting Discord bot...`);
+await startDiscordBot();
+
 // ─── Graceful Shutdown ───────────────────────────────────
 
 const shutdown = async () => {
     console.log("\n👋 Shutting down Gravity Claw...");
     bot.stop();
+    await stopDiscordBot();
     stopAllJobs();
     await disconnectAll();
     await closeDatabase();

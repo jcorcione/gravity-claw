@@ -3,6 +3,8 @@ import "dotenv/config";
 interface Config {
     /** Telegram bot token from @BotFather */
     telegramBotToken: string;
+    /** Discord bot token (optional) */
+    discordBotToken: string | null;
     /** Cron schedule for heartbeat check-ins */
     heartbeatCheckinCron: string;
 
@@ -71,6 +73,7 @@ function parseUserIds(raw: string): number[] {
 
 export const config: Readonly<Config> = Object.freeze({
     telegramBotToken: requireEnv("TELEGRAM_BOT_TOKEN"),
+    discordBotToken: process.env["DISCORD_BOT_TOKEN"] ?? null,
     heartbeatCheckinCron: process.env.HEARTBEAT_CHECKIN_CRON || "0 0 * * *", // Daily at midnight UTC
     openRouterApiKey: requireEnv("OPENROUTER_API_KEY"),
     allowedUserIds: parseUserIds(requireEnv("ALLOWED_USER_IDS")),
