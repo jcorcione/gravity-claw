@@ -1,72 +1,53 @@
 import { NextResponse } from "next/server";
 
+// The Railway backend is the single source of truth for all data.
+// Mission Control calls Railway, which queries Supabase + Pinecone internally.
 const RAILWAY_URL = process.env.RAILWAY_URL || "https://gravity-claw-production.up.railway.app";
-const SUPABASE_URL = process.env.SUPABASE_URL || "";
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "";
-const PINECONE_API_KEY = process.env.PINECONE_API_KEY || "";
-const PINECONE_INDEX = process.env.PINECONE_INDEX || "gravity-claw";
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
+const DASHBOARD_SECRET = process.env.DASHBOARD_SECRET || "";
 
-async function getSupabaseStats() {
-    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return { messages: 0, facts: 0 };
-    try {
-        const [msgRes, factsRes] = await Promise.all([
-            fetch(`${SUPABASE_URL}/rest/v1/messages?select=id&limit=1`, {
-                headers: { apikey: SUPABASE_ANON_KEY, "Content-Range": "0-0/*", Prefer: "count=exact" },
-            }),
-            fetch(`${SUPABASE_URL}/rest/v1/bot_facts?select=id&limit=1`, {
-                headers: { apikey: SUPABASE_ANON_KEY, "Content-Range": "0-0/*", Prefer: "count=exact" },
-            }),
-        ]);
-        const messages = parseInt(msgRes.headers.get("content-range")?.split("/")[1] || "0");
-        const facts = parseInt(factsRes.headers.get("content-range")?.split("/")[1] || "0");
-        return { messages, facts };
-    } catch { return { messages: 0, facts: 0 }; }
-}
-
-async function getPineconeStats() {
-    if (!PINECONE_API_KEY) return { vectors: 0 };
-    try {
-        const res = await fetch(`https://api.pinecone.io/indexes/${PINECONE_INDEX}`, {
-            headers: { "Api-Key": PINECONE_API_KEY },
-        });
-        if (!res.ok) return { vectors: 0 };
-        const data = await res.json() as any;
-        return { vectors: data.status?.totalRecordCount || 0 };
-    } catch { return { vectors: 0 }; }
-}
-
-async function getOpenRouterBalance() {
-    if (!OPENROUTER_API_KEY) return { total: 0, used: 0, remaining: 0 };
-    try {
-        const res = await fetch("https://openrouter.ai/api/v1/credits", {
-            headers: { Authorization: `Bearer ${OPENROUTER_API_KEY}` },
-        });
-        const data = await res.json() as any;
-        const total = parseFloat(data?.data?.total_credits || 0);
-        const used = parseFloat(data?.data?.total_usage || 0);
-        return { total, used, remaining: total - used };
-    } catch { return { total: 0, used: 0, remaining: 0 }; }
-}
-
-async function getRecentMessages() {
-    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return [];
-    try {
-        const res = await fetch(
-            `${SUPABASE_URL}/rest/v1/messages?select=id,role,content,user_id,created_at&order=created_at.desc&limit=20`,
-            { headers: { apikey: SUPABASE_ANON_KEY } }
-        );
-        return await res.json() as any[];
-    } catch { return []; }
+async function callRailway(path: string) {
+    const res = await fetch(`${RAILWAY_URL}/api/dashboard/${path}`, {
+        headers: {
+            "x-dashboard-token": DASHBOARD_SECRET,
+            "Content-Type": "application/json",
+        },
+        // Don't cache — always fresh data
+        cache: "no-store",
+    });
+    if (!res.ok) {
+        throw new Error(`Railway returned ${res.status} on /api/dashboard/${path}`);
+    }
+    return res.json();
 }
 
 export async function GET() {
-    const [supabase, pinecone, balance, messages] = await Promise.all([
-        getSupabaseStats(),
-        getPineconeStats(),
-        getOpenRouterBalance(),
-        getRecentMessages(),
-    ]);
+    try {
+        // Fetch all data tiers in parallel from Railway
+        const [statsData, messagesData, factsData, schedulesData] = await Promise.allSettled([
+            callRailway("stats"),
+            callRailway("messages?userId=default_user&limit=30"),
+            callRailway("facts?userId=default_user"),
+            callRailway("schedules?userId=default_user"),
+        ]);
 
-    return NextResponse.json({ supabase, pinecone, balance, messages, railwayUrl: RAILWAY_URL });
+        const stats = statsData.status === "fulfilled" ? statsData.value : {};
+        const messages = messagesData.status === "fulfilled" ? messagesData.value.messages ?? [] : [];
+        const facts = factsData.status === "fulfilled" ? factsData.value.facts ?? [] : [];
+        const schedules = schedulesData.status === "fulfilled" ? schedulesData.value.schedules ?? [] : [];
+
+        return NextResponse.json({
+            // Top-level stats
+            users: (stats as any).users ?? 0,
+            pineconeVectors: (stats as any).pineconeVectors ?? 0,
+            balance: (stats as any).balance ?? { total: 0, used: 0, remaining: 0 },
+            userStats: (stats as any).userStats ?? [],
+
+            // 3-tier memory data
+            tier1Messages: messages,  // Tier 1: Conversation history
+            tier2Facts: facts,     // Tier 2: Structured facts
+            schedules,                // Cron schedules
+        });
+    } catch (err: any) {
+        return NextResponse.json({ error: err.message }, { status: 500 });
+    }
 }

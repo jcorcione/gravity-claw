@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { runAgentLoop } from "./agent.js";
+import dashboardRouter from "./dashboard-api.js";
 import "./index.js"; // This automatically boots the Telegram bot and initializes all DB/MCP connections
 
 const app = express();
@@ -8,6 +9,10 @@ const PORT = process.env.PORT || 8080;
 
 app.use(cors());
 app.use(express.json());
+
+// ─── Dashboard API (Mission Control) ─────────────────────
+app.use("/api/dashboard", dashboardRouter);
+
 
 app.post("/api/chat", async (req, res) => {
     try {
