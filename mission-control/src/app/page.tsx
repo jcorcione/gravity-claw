@@ -220,10 +220,10 @@ export default function CommandCenter() {
             <div className="card-title mb-4">System Status</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {[
-                { label: "Railway Backend", status: "online" },
-                { label: "Supabase DB", status: stats ? "online" : "checking" },
-                { label: "Pinecone Index", status: (stats?.pineconeVectors ?? 0) > 0 ? "online" : "checking" },
-                { label: "OpenRouter API", status: balance?.total ? "online" : "checking" },
+                { label: "Railway Backend", status: stats !== null ? "online" : "checking" },
+                { label: "Supabase DB", status: stats !== null ? "online" : "checking" },
+                { label: "Pinecone Index", status: loading ? "checking" : stats !== null ? "online" : "error" },
+                { label: "OpenRouter API", status: loading ? "checking" : balance?.total != null ? "online" : "error" },
               ].map(({ label, status }) => (
                 <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>{label}</span>
