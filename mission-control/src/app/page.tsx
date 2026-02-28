@@ -7,10 +7,12 @@ import {
 } from "lucide-react";
 
 interface Stats {
-  supabase: { messages: number; facts: number };
-  pinecone: { vectors: number };
+  users: number;
+  pineconeVectors: number;
   balance: { total: number; used: number; remaining: number };
-  messages: Array<{ id: string; role: string; content: string; user_id: string; created_at: string }>;
+  tier1Messages: Array<{ id?: string; role: string; content: string; user_id: string; created_at?: string; timestamp?: string }>;
+  tier2Facts: Array<{ id: number; entity: string; attribute: string; value: string }>;
+  schedules: Array<{ id: number; name: string; cron: string }>;
 }
 
 const ROLE_ICON: Record<string, string> = {
@@ -68,6 +70,7 @@ export default function CommandCenter() {
 
   const balance = stats?.balance;
   const balanceLow = balance && balance.remaining < 5;
+  const messages = stats?.tier1Messages ?? [];
 
   return (
     <>
@@ -79,9 +82,9 @@ export default function CommandCenter() {
       {/* Stat Cards */}
       <div className="stat-grid">
         {[
-          { label: "Messages Stored", value: loading ? "—" : stats?.supabase.messages.toLocaleString(), color: "blue", Icon: MessageSquare },
-          { label: "Semantic Memories", value: loading ? "—" : stats?.pinecone.vectors.toLocaleString(), color: "orange", Icon: Cpu },
-          { label: "Stored Facts", value: loading ? "—" : stats?.supabase.facts.toLocaleString(), color: "purple", Icon: Database },
+          { label: "Messages Stored", value: loading ? "—" : messages.length.toLocaleString(), color: "blue", Icon: MessageSquare },
+          { label: "Semantic Memories", value: loading ? "—" : (stats?.pineconeVectors ?? 0).toLocaleString(), color: "orange", Icon: Cpu },
+          { label: "Stored Facts", value: loading ? "—" : (stats?.tier2Facts?.length ?? 0).toLocaleString(), color: "purple", Icon: Database },
           {
             label: "OpenRouter Balance",
             value: loading ? "—" : `$${balance?.remaining.toFixed(2)}`,
@@ -122,12 +125,12 @@ export default function CommandCenter() {
                   </div>
                 </div>
               ))
-            ) : stats?.messages.length === 0 ? (
+            ) : messages.length === 0 ? (
               <p style={{ color: "var(--text-muted)", padding: "20px 0", fontSize: "0.85rem" }}>
                 No messages yet. Start chatting on Telegram or Discord!
               </p>
-            ) : stats?.messages.map((msg) => (
-              <div key={msg.id} className="activity-item">
+            ) : messages.map((msg, idx) => (
+              <div key={msg.id ?? idx} className="activity-item">
                 <div
                   className="activity-icon"
                   style={{ background: `var(${ROLE_COLOR[msg.role] || "--bg-elevated"}-dim, var(--bg-elevated))` }}
@@ -142,7 +145,7 @@ export default function CommandCenter() {
                     {" "}{msg.content?.substring(0, 80)}{msg.content?.length > 80 ? "…" : ""}
                   </div>
                   <div className="activity-meta">
-                    user:{msg.user_id} · {timeAgo(msg.created_at)}
+                    user:{msg.user_id} · {timeAgo(msg.created_at ?? msg.timestamp ?? "")}
                   </div>
                 </div>
               </div>
@@ -219,7 +222,7 @@ export default function CommandCenter() {
               {[
                 { label: "Railway Backend", status: "online" },
                 { label: "Supabase DB", status: stats ? "online" : "checking" },
-                { label: "Pinecone Index", status: stats?.pinecone.vectors ? "online" : "checking" },
+                { label: "Pinecone Index", status: (stats?.pineconeVectors ?? 0) > 0 ? "online" : "checking" },
                 { label: "OpenRouter API", status: balance?.total ? "online" : "checking" },
               ].map(({ label, status }) => (
                 <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
