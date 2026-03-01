@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 // The Railway backend is the single source of truth for all data.
 // Mission Control calls Railway, which queries Supabase + Pinecone internally.
-const RAILWAY_URL = process.env.RAILWAY_URL || "https://gravity-claw-production.up.railway.app";
+const RAILWAY_URL = process.env.RAILWAY_URL || "https://gravity-claw-production-d161.up.railway.app";
 const DASHBOARD_SECRET = process.env.DASHBOARD_SECRET || "";
 
 async function callRailway(path: string) {

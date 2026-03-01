@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const RAILWAY_URL = process.env.RAILWAY_URL || "https://gravity-claw-production.up.railway.app";
+const RAILWAY_URL = process.env.RAILWAY_URL || "https://gravity-claw-production-d161.up.railway.app";
 const DASHBOARD_SECRET = process.env.DASHBOARD_SECRET || "";
 
 const RAILWAY_ACTIONS: Record<string, { path: string; method?: string }> = {
