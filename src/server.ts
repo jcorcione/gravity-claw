@@ -14,6 +14,11 @@ app.use(express.json());
 app.use("/api/dashboard", dashboardRouter);
 
 
+// ─── Health check ────────────────────────────────────────
+app.get("/health", (_req, res) => {
+    res.json({ ok: true, version: "dashboard-api-v1", ts: new Date().toISOString() });
+});
+
 app.post("/api/chat", async (req, res) => {
     try {
         const { message, userId } = req.body;
