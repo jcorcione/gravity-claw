@@ -76,6 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
+            // Skip external links (e.g. Mission Control) — let them open normally
+            if (item.classList.contains('nav-external') || !item.getAttribute('data-target')) return;
+
             e.preventDefault();
 
             navItems.forEach(n => n.classList.remove('active'));
