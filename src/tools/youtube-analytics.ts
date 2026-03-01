@@ -1,10 +1,11 @@
 import fetch from "node-fetch";
 
-// Channel handle → Channel ID mapping for your two channels
-// IDs are resolved at runtime if not hardcoded
-const KNOWN_CHANNELS: Record<string, string> = {
-    "gracenoteinspriations": "UCgracenoteinspriations", // will be resolved dynamically
-    "gigawerx": "UCgigawerx",
+// Confirmed channel IDs — hardcoded so the tool works immediately without API search
+const KNOWN_CHANNELS: Record<string, { id: string; handle: string; title: string }> = {
+    "gracenoteinspirations": { id: "UCh5IUq3irUBvhR-PoZYh87Q", handle: "@gracenoteinspirations", title: "Grace Note Inspirations" },
+    "gracenoteinspiration": { id: "UCh5IUq3irUBvhR-PoZYh87Q", handle: "@gracenoteinspirations", title: "Grace Note Inspirations" },
+    "gracenote": { id: "UCh5IUq3irUBvhR-PoZYh87Q", handle: "@gracenoteinspirations", title: "Grace Note Inspirations" },
+    "gigawerx": { id: "UC2INQGyEm01fNY3CUoJAGIg", handle: "@gigawerx", title: "The Gigawerx Channel" },
 };
 
 function getApiKey(): string {
@@ -14,8 +15,12 @@ function getApiKey(): string {
 }
 
 async function resolveChannelId(handleOrQuery: string): Promise<{ id: string; title: string; handle: string }> {
+    // Check hardcoded map first (fast, no API quota)
+    const key = handleOrQuery.replace(/^@/, "").toLowerCase();
+    if (KNOWN_CHANNELS[key]) return KNOWN_CHANNELS[key];
+
+    // Fallback: try YouTube forHandle API
     const apiKey = getApiKey();
-    // Try handle-based lookup first (@handle format)
     const handle = handleOrQuery.replace(/^@/, "");
     const url = `https://www.googleapis.com/youtube/v3/channels?part=id,snippet&forHandle=${encodeURIComponent(handle)}&key=${apiKey}`;
     const res = await fetch(url);
@@ -26,16 +31,7 @@ async function resolveChannelId(handleOrQuery: string): Promise<{ id: string; ti
         return { id: ch.id, title: ch.snippet.title, handle: ch.snippet.customUrl || handle };
     }
 
-    // Fallback: search query
-    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(handleOrQuery)}&maxResults=1&key=${apiKey}`;
-    const sRes = await fetch(searchUrl);
-    const sData = await sRes.json() as any;
-    if (sData.items && sData.items.length > 0) {
-        const ch = sData.items[0];
-        return { id: ch.id.channelId, title: ch.snippet.channelTitle, handle: handleOrQuery };
-    }
-
-    throw new Error(`Could not resolve channel for: ${handleOrQuery}`);
+    throw new Error(`Could not resolve channel for: ${handleOrQuery}. Try 'gracenoteinspirations' or 'gigawerx'.`);
 }
 
 async function getChannelStats(channelId: string): Promise<any> {
