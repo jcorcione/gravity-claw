@@ -65,6 +65,7 @@ import { manageCalendarTool } from "./manage-calendar.js";
 import { searchWebTool } from "./search-web.js";
 import { analyzeSeoTool } from "./analyze-seo.js";
 import { checkOpenRouterBalanceTool } from "./check-openrouter-balance.js";
+import { youtubeAnalyticsTool } from "./youtube-analytics.js";
 
 // Prevent multiple registrations if file is re-imported
 if (registry.size === 0) {
@@ -83,4 +84,5 @@ if (registry.size === 0) {
     registerTool(searchWebTool);
     registerTool(analyzeSeoTool);
     registerTool(checkOpenRouterBalanceTool);
+    registerTool(youtubeAnalyticsTool);
 }
