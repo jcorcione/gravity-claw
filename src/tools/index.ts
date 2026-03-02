@@ -67,6 +67,7 @@ import { analyzeSeoTool } from "./analyze-seo.js";
 import { checkOpenRouterBalanceTool } from "./check-openrouter-balance.js";
 import { youtubeAnalyticsTool } from "./youtube-analytics.js";
 import { youtubeScriptGeneratorTool } from "./youtube-script-generator.js";
+import { comfyuiGenerateTool } from "./comfyui-generate.js";
 
 // Prevent multiple registrations if file is re-imported
 if (registry.size === 0) {
@@ -87,4 +88,5 @@ if (registry.size === 0) {
     registerTool(checkOpenRouterBalanceTool);
     registerTool(youtubeAnalyticsTool);
     registerTool(youtubeScriptGeneratorTool);
+    registerTool(comfyuiGenerateTool);
 }
