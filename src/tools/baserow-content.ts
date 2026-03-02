@@ -48,16 +48,39 @@ async function baserowPatch(path: string, body: Record<string, unknown>): Promis
     return res.json();
 }
 
+// Valid status values (must match Baserow exactly)
+const VALID_STATUSES = ["new", "script_ready", "fact_ok", "seo_ready", "rendering", "rendered", "error"] as const;
+
 export const baserowContentTool = {
     name: "baserow_content",
-    description: `Manages the YouTube content pipeline in Baserow for both @gracenoteinspirations and @gigawerx channels.
-    Actions:
-    - 'list_pending': Get all rows with no script or status=pending — these need content generation
-    - 'create': Add a new video idea to the pipeline (topic, channel, tags)
-    - 'update': Update a row with generated script, title, description, hashtags, thumbnail prompts, status
-    - 'get_row': Fetch a specific row by ID
-    - 'list_all': List all rows with optional channel filter
-    Use this to track video production from idea → script → thumbnail → ready to upload.`,
+    description: `Manages the YouTube Shorts content pipeline in Baserow (Table 642827) for @gracenoteinspirations and @gigawerx.
+
+FIELD NAMES (use exactly as shown):
+- topic: The video idea or pain point
+- script: Full 3-part script (hook + body + CTA)
+- title: SEO-optimized YouTube title (60-70 chars)
+- description: YouTube video description
+- hashtags: Hashtags string e.g. "#shorts #faith #prayer"
+- tags: Semicolon-separated tags e.g. "#shorts;faith;prayer"
+- thumbnail_1/2/3: Thumbnail prompt text or generated image URL
+- selected_thumbnail: Which of the 3 thumbnails was chosen
+- filename: Output filename for the video
+- mp4_path: Final rendered video URL or local path
+- scenes_manifest: JSON string with scene-by-scene breakdown
+- channel: "gracenote" or "gigawerx" (single select)
+- status: MUST be one of: new, script_ready, fact_ok, seo_ready, rendering, rendered, error
+
+WORKFLOW: new → script_ready → fact_ok → seo_ready → rendering → rendered
+
+ACTIONS:
+- list_pending: Get rows with no script yet (status=new or null) — need content generation
+- list_all: List all rows, optionally filtered by channel
+- create: Add a new video idea (sets status=new automatically)
+- update: Write generated content back to a row (script, title, thumbnails, status etc.)
+- get_row: Fetch one specific row by ID
+
+TYPICAL FLOW: create row → generate script (youtube_script_generator) → update row with script+status=script_ready → generate 3 thumbnail prompts → comfyui_generate for images → update thumbnail_1/2/3 → elevenlabs_audio for voiceover → update mp4_path + status=rendered`,
+
     inputSchema: {
         type: "object",
         properties: {
@@ -134,7 +157,9 @@ export const baserowContentTool = {
                 const data = await baserowGet(
                     `/database/rows/table/${TABLES.pipeline}/?user_field_names=true&size=50&order_by=id`
                 );
-                let rows = data.results.filter((r: any) => !r.script || r.script === "");
+                let rows = data.results.filter((r: any) =>
+                    !r.script || r.script === "" || r.status?.value === "new" || r.status === null
+                );
 
                 // Filter by channel if Channel field exists
                 if (channel !== "all") {
