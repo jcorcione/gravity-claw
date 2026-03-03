@@ -103,13 +103,11 @@ async function buildSystemPrompt(): Promise<string> {
 }
 
 // ─── Free model rotation for 429 fallback ───────────────
+// Only models confirmed to support function/tool calling via OpenRouter
 const FREE_MODEL_ROTATION = [
     "google/gemini-2.0-flash-thinking-exp:free",
     "meta-llama/llama-3.3-70b-instruct:free",
-    "mistralai/mistral-small-3.1-24b-instruct:free",
     "deepseek/deepseek-r1-0528:free",
-    "openai/gpt-oss-120b:free",
-    "z-ai/glm-4.5-air:free",
 ];
 
 // ─── Chat ────────────────────────────────────────────────
@@ -151,6 +149,12 @@ export async function chat(
                 messages: builtMessages,
                 tools: openAiTools.length > 0 ? openAiTools : undefined,
             });
+            // Skip models that return empty/missing choices
+            if (!result.choices || result.choices.length === 0) {
+                console.warn(`  ⚠️ Model ${modelId} returned empty choices, rotating...`);
+                lastError = new Error(`Model ${modelId} returned no choices`);
+                continue;
+            }
             return result;
         } catch (err: any) {
             const status = err?.status ?? err?.response?.status;
