@@ -17,32 +17,43 @@ interface ActiveJob {
 const activeJobs = new Map<string, ActiveJob>();
 let botInstance: Bot | null = null;
 
-// ─── Morning Briefing Prompt ─────────────────────────────
+// ─── Intelligence Briefing Prompt ──────────────────────────────
 
-const BRIEFING_PROMPT = `You are running a proactive morning briefing. The user hasn't asked for this — you're reaching out.
+const BRIEFING_PROMPT = `You are running John Corcione's hourly intelligence briefing. Execute the following steps in order and compile a clean report. Do NOT show raw JSON or tool call details — only a clean formatted summary.
 
-DO THIS:
-1. Use get_current_time to check the current time and day.
-2. Use search_memory to find any relevant memories (preferences, tasks, events, reminders).
-3. Use check_openrouter_balance to see your remaining AI funds.
-4. Compose a brief, friendly morning message that includes:
-   - A greeting with the day/date
-   - Any relevant reminders from memory
-   - Your remaining OpenRouter balance (only if it's getting low!)
-   - Something useful or encouraging
+STEP 1 — RECRUITER EMAIL SCAN:
+Run scan_recruiter_emails (max 10). Report: how many emails scanned, any recruiter contacts found, any cover letters drafted.
 
-Keep it SHORT — 3-5 sentences max. This is a quick check-in, not an essay.
-Start with a greeting emoji like ☀️ or 🌅.`;
+STEP 2 — YOUTUBE CHANNEL PERFORMANCE:
+Run youtube_analytics for channel="@gracenoteinspriations" and then for channel="@gigawerx" (type="overview"). Report key stats: subscribers, recent views, any notable trends.
 
-const CHECKIN_PROMPT = `You are running a proactive check-in. The user hasn't asked for this — you're reaching out.
+STEP 3 — TRENDING TOPICS (use Tavily search MCP):
+- Search: "trending Christian faith prayer YouTube Shorts 2026"
+- Search: "trending AI tools freelancing gig economy 2026"
+Report the 2-3 most actionable trending topics found for each channel.
 
-DO THIS:
-1. Use get_current_time to check the time.
-2. Use search_memory to recall anything relevant.
-3. Send a brief, helpful message — one or two sentences.
+STEP 4 — TODAY'S CALENDAR:
+Run search_calendar for today's date. Report any events, deadlines, or reminders.
 
-Be useful, not annoying. Only send if there's something worth saying.
-If you have nothing relevant, just say a brief friendly check-in.`;
+STEP 5 — BASEROW PIPELINE STATUS:
+Run baserow_content (action=list_pending). Report how many videos are pending in each channel.
+
+STEP 6 — COMPILE REPORT:
+Send John a clean briefing using this format:
+
+☀️ *Gravity Claw Intel Brief* — [time/date]
+
+📧 *Email Scan:* [summary]
+📺 *YouTube:* [brief channel stats]
+🔥 *Hot Topics:*
+• Grace Note: [topic]
+• Gigawerx: [topic]
+📅 *Calendar:* [today's events or "Nothing scheduled"]
+🎬 *Pipeline:* [X videos pending]
+
+Keep it tight — 10 sentences max total. Only flag things that need John's attention.`;
+
+const CHECKIN_PROMPT = `Quick proactive check-in from Gravity Claw. Use get_current_time to get the time. Run search_semantic_memory for any pending tasks or reminders. Send a 1-2 sentence check-in only if there's something worth flagging. Otherwise skip.`;
 
 // ─── Send Proactive Message ──────────────────────────────
 
@@ -124,14 +135,14 @@ export function stopAllJobs(): void {
 export async function initHeartbeat(bot: Bot): Promise<void> {
     botInstance = bot;
 
-    // Built-in: Morning briefing
-    const morningCron = process.env["HEARTBEAT_MORNING_CRON"] ?? "0 8 * * *";
-    startJob("builtin_morning", morningCron, BRIEFING_PROMPT, "Morning Briefing");
+    // Built-in: Hourly intelligence briefing (every 60 minutes)
+    const morningCron = process.env["HEARTBEAT_MORNING_CRON"] ?? "0 * * * *";
+    startJob("builtin_morning", morningCron, BRIEFING_PROMPT, "Hourly Intel Brief");
 
-    // Built-in: Periodic check-in (disabled by default)
+    // Built-in: Periodic check-in (optional, disabled by default)
     const checkinEnabled = process.env["HEARTBEAT_CHECKIN_ENABLED"] === "true";
     if (checkinEnabled) {
-        const checkinCron = process.env["HEARTBEAT_CHECKIN_CRON"] ?? "0 */4 * * *";
+        const checkinCron = process.env["HEARTBEAT_CHECKIN_CRON"] ?? "30 * * * *";
         startJob("builtin_checkin", checkinCron, CHECKIN_PROMPT, "Periodic Check-in");
     }
 
