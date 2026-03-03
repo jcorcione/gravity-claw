@@ -102,6 +102,16 @@ async function buildSystemPrompt(): Promise<string> {
     return prompt;
 }
 
+// ─── Free model rotation for 429 fallback ───────────────
+const FREE_MODEL_ROTATION = [
+    "google/gemini-2.0-flash-thinking-exp:free",
+    "meta-llama/llama-3.3-70b-instruct:free",
+    "mistralai/mistral-small-3.1-24b-instruct:free",
+    "deepseek/deepseek-r1-0528:free",
+    "openai/gpt-oss-120b:free",
+    "z-ai/glm-4.5-air:free",
+];
+
 // ─── Chat ────────────────────────────────────────────────
 
 export async function chat(
@@ -117,17 +127,43 @@ export async function chat(
         },
     }));
 
-    const model = getActiveModel();
-    console.log(`  🧠 Using model: ${model.alias} (${model.modelId})`);
+    const systemPrompt = await buildSystemPrompt();
+    const builtMessages = [
+        { role: "system" as const, content: systemPrompt },
+        ...messages,
+    ];
 
-    return client.chat.completions.create({
-        model: model.modelId,
-        max_tokens: config.llmMaxTokens,
-        messages: [
-            { role: "system", content: await buildSystemPrompt() },
-            ...messages,
-        ],
-        tools: openAiTools.length > 0 ? openAiTools : undefined,
-    });
+    // Build ordered list: active model first, then free rotation fallbacks
+    const primary = getActiveModel();
+    const modelsToTry = [
+        primary.modelId,
+        ...FREE_MODEL_ROTATION.filter(m => m !== primary.modelId),
+    ];
+
+    let lastError: Error | null = null;
+
+    for (const modelId of modelsToTry) {
+        try {
+            console.log(`  🧠 Trying model: ${modelId}`);
+            const result = await client.chat.completions.create({
+                model: modelId,
+                max_tokens: config.llmMaxTokens,
+                messages: builtMessages,
+                tools: openAiTools.length > 0 ? openAiTools : undefined,
+            });
+            return result;
+        } catch (err: any) {
+            const status = err?.status ?? err?.response?.status;
+            if (status === 429 || status === 451) {
+                console.warn(`  ⚠️ Model ${modelId} rate-limited (${status}), rotating...`);
+                lastError = err;
+                await new Promise(r => setTimeout(r, 500)); // brief pause
+                continue;
+            }
+            throw err; // Non-rate-limit errors bubble up immediately
+        }
+    }
+
+    throw lastError ?? new Error("All models exhausted — rate limited across all free providers.");
 }
 
