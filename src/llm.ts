@@ -66,6 +66,7 @@ Valid status values (use EXACTLY): new → script_ready → fact_ok → seo_read
 
 For quick requests (just a script, no Baserow needed), skip the Baserow steps.
 For "add to pipeline" or "create a video" requests, use the full chain.
+CRITICAL: After baserow_content create, read the "rowId" field from the response JSON and use that exact integer for ALL subsequent update calls. Never use row_id=1 or guess — always extract it from the create response.
 
 ───────────────────────────────────────
 MEMORY INSTRUCTIONS:
