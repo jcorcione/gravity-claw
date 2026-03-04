@@ -18,14 +18,27 @@ const CATEGORIES: Record<string, string> = {
     "entertainment": "24",
 };
 
-function getOAuth2Client() {
+function getOAuth2Client(channelType: string) {
+    // Pick the correct refresh token for each channel account
+    const refreshToken =
+        (channelType === "grace_note" || channelType === "faith" || channelType === "inspiration")
+            ? process.env["GRACE_NOTE_REFRESH_TOKEN"]
+            : (channelType === "gigawerx" || channelType === "tech" || channelType === "education")
+                ? process.env["GIGAWERX_REFRESH_TOKEN"]
+                : process.env["GOOGLE_REFRESH_TOKEN"]; // fallback
+
+    if (!refreshToken) {
+        throw new Error(
+            `Missing refresh token for channel "${channelType}". ` +
+            `Add GRACE_NOTE_REFRESH_TOKEN or GIGAWERX_REFRESH_TOKEN to Railway env vars.`
+        );
+    }
+
     const client = new google.auth.OAuth2(
         process.env["GOOGLE_CLIENT_ID"],
         process.env["GOOGLE_CLIENT_SECRET"],
     );
-    client.setCredentials({
-        refresh_token: process.env["GOOGLE_REFRESH_TOKEN"],
-    });
+    client.setCredentials({ refresh_token: refreshToken });
     return client;
 }
 
@@ -94,7 +107,7 @@ Typical use after video_compile → r2_upload:
         required: ["title"],
     },
     execute: async (input) => {
-        const missingVars = ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_REFRESH_TOKEN"]
+        const missingVars = ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"]
             .filter(v => !process.env[v]);
         if (missingVars.length > 0) {
             return `Error: Missing Google OAuth env vars: ${missingVars.join(", ")}`;
@@ -130,9 +143,9 @@ Typical use after video_compile → r2_upload:
 
             const fileSize = fs.statSync(videoPath!).size;
             const fileSizeMb = (fileSize / 1024 / 1024).toFixed(1);
-            console.log(`  📹 YouTube Upload: "${title}" (${fileSizeMb} MB, ${privacy})`);
+            console.log(`  📹 YouTube Upload: "${title}" (${fileSizeMb} MB, ${privacy}) → ${channelType}`);
 
-            const auth = getOAuth2Client();
+            const auth = getOAuth2Client(channelType);
             const youtube = google.youtube({ version: "v3", auth });
 
             const res = await youtube.videos.insert({
