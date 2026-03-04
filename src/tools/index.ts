@@ -71,6 +71,8 @@ import { comfyuiGenerateTool } from "./comfyui-generate.js";
 import { elevenlabsAudioTool } from "./elevenlabs-audio.js";
 import { baserowContentTool } from "./baserow-content.js";
 import { browserAgentTool } from "./browser-agent.js";
+import { videoCompileTool } from "./video-compile.js";
+import { edgeTtsTool } from "./edge-tts.js";
 
 // Prevent multiple registrations if file is re-imported
 if (registry.size === 0) {
@@ -95,4 +97,6 @@ if (registry.size === 0) {
     registerTool(elevenlabsAudioTool);
     registerTool(baserowContentTool);
     registerTool(browserAgentTool);
+    registerTool(videoCompileTool);
+    registerTool(edgeTtsTool);
 }
