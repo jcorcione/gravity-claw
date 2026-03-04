@@ -19,30 +19,40 @@ let botInstance: Bot | null = null;
 
 // ─── Intelligence Briefing Prompt ──────────────────────────────
 
-const BRIEFING_PROMPT = `You are running John Corcione's morning intelligence briefing. Execute the following steps and compile a clean report. Do NOT show raw JSON or tool call details — only a clean formatted summary.
+const BRIEFING_PROMPT = `You are running John Corcione's morning intelligence briefing. Execute the following steps and compile a clean report. Do NOT show raw JSON or tool call details — only clean formatted output.
 
 STEP 1 — RECRUITER EMAIL SCAN:
-Run scan_recruiter_emails (max 10). Report: how many emails, any recruiter contacts found, any cover letters drafted.
+Run scan_recruiter_emails (max 10). Report: how many emails, any recruiter contacts, any cover letters drafted.
 
-STEP 2 — TRENDING TOPICS (use Tavily MCP search):
-- Search: "trending Christian faith prayer encouragement YouTube Shorts 2026"
-- Search: "trending AI tools freelancing gig economy apps 2026"
-Report 2-3 actionable trending topics per channel.
+STEP 2 — SITE SCAN (use Tavily MCP search tool):
+a) Search/scrape https://jcorcione.com — find the latest articles or posts on the site. Report 1-2 recent content items.
+b) Search/scrape https://wired.com for the latest AI news headlines published today. Report top 3 headlines.
 
-STEP 3 — TODAY'S CALENDAR:
+STEP 3 — GOOGLE TRENDS FOR GIGAWERX (use Tavily MCP search tool):
+Search: "Google Trends AI tools freelancing gig economy trending topics today 2026"
+Also search: "trending tech stories site:trends.google.com OR site:techcrunch.com AI tools 2026"
+Report the 2-3 hottest trending topics relevant to AI/freelancing/tech for the Gigawerx channel.
+
+STEP 4 — GRACE NOTE TRENDS (use Tavily MCP search tool):
+Search: "trending Christian encouragement prayer faith YouTube Shorts 2026"
+Report the 2-3 most shareable faith/prayer topics trending right now.
+
+STEP 5 — TODAY'S CALENDAR:
 Run search_calendar for today. Report any events or deadlines.
 
-STEP 4 — COMPILE & SEND:
+STEP 6 — COMPILE & SEND:
 Format the briefing as:
 
 ☀️ *Good morning John — Gravity Claw Intel Brief* [date]
 
-📧 *Email:* [recruiter summary or "Inbox clear"]
-🔥 *Grace Note Trends:* [topic 1, topic 2]
-⚡ *Gigawerx Trends:* [topic 1, topic 2]
+📧 *Email:* [summary or "Inbox clear"]
+🌐 *JCorcione.com:* [latest post or content]
+📰 *Wired AI News:* [top 2 headlines]
+⚡ *Gigawerx Trends:* [top 2-3 hot topics]
+🙏 *Grace Note Trends:* [top 2 faith topics]
 📅 *Today:* [events or "Nothing scheduled"]
 
-Keep it under 10 sentences. Only flag what needs attention.`;
+Keep it tight — under 15 sentences total. Only flag what needs John's attention.`;
 
 const CHECKIN_PROMPT = `Quick check-in from Gravity Claw. Use get_current_time to get the time. Run search_semantic_memory for any pending tasks or reminders. Send a 1-2 sentence check-in only if there's something worth flagging. Otherwise stay quiet.`;
 
