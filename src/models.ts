@@ -17,9 +17,10 @@ const models: ModelEntry[] = [
     { alias: "GLM", modelId: "z-ai/glm-4.5-air:free", free: true },
     { alias: "GPT", modelId: "openai/gpt-oss-120b:free", free: true },
     { alias: "Haiku", modelId: "anthropic/claude-3.5-haiku", free: false },
+    { alias: "Kimi", modelId: "moonshotai/kimi-k2:free", free: true }, // Best free agentic tool-calling
     { alias: "Llama", modelId: "meta-llama/llama-3.3-70b-instruct:free", free: true },
     { alias: "Sonnet", modelId: "anthropic/claude-3.5-sonnet", free: false },
-    { alias: "Trinity", modelId: "arcee-ai/trinity-large-preview:free", free: true },
+    { alias: "Trinity", modelId: "arcee-ai/trinity-large-preview:free", free: true }, // Best for creative/chat
 ];
 
 import { config } from "./config.js";
@@ -33,7 +34,7 @@ const aliasMap = new Map<string, ModelEntry>(
 
 let activeModel: ModelEntry = models.find((m) => m.modelId === config.llmModel)
     ?? aliasMap.get(config.llmModel.toLowerCase())
-    ?? aliasMap.get("sonnet")
+    ?? aliasMap.get("kimi")   // Default free brain: Kimi K2 (best free agentic tool-calling)
     ?? models[0];
 
 export function getActiveModel(): ModelEntry {
@@ -68,6 +69,6 @@ export function getFallbackSmarterModel(): ModelEntry {
 export function resetToDefaultModel(): void {
     activeModel = models.find((m) => m.modelId === config.llmModel)
         ?? aliasMap.get(config.llmModel.toLowerCase())
-        ?? aliasMap.get("sonnet")
+        ?? aliasMap.get("kimi")   // Default free brain
         ?? models[0];
 }
