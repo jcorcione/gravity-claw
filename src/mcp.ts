@@ -170,12 +170,7 @@ export async function initMcpServers(): Promise<void> {
                 continue;
             }
 
-            // [Railway Hotfix] We completely replaced gmail-mcp with direct googleapis calls 
-            // to fix parsing errors and memory bloat. Skip booting it even if it's in the .env string.
-            if (config.name === "gmail") {
-                console.log(`  ⏩ Skipping legacy MCP server "${config.name}" (replaced with direct Google API fallback)`);
-                continue;
-            }
+           }
 
             try {
                 await connectMcpServer(config);
