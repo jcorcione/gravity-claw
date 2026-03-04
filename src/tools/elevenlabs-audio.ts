@@ -60,34 +60,20 @@ async function generateVoiceover(
 }
 
 // ─── Music Generation ─────────────────────────────────────────────────────────
+// NOTE: ElevenLabs text-to-sound-effects requires Creator+ plan (paid tier).
+// Returning a clear error so the pipeline can skip music and proceed with voiceover only.
 async function generateMusic(
-    prompt: string,
-    durationSeconds: number,
-    outputPath: string
+    _prompt: string,
+    _durationSeconds: number,
+    _outputPath: string
 ): Promise<void> {
-    const key = getApiKey();
-    const res = await fetch(`${ELEVENLABS_BASE}/text-to-sound-effects`, {
-        method: "POST",
-        headers: {
-            "xi-api-key": key,
-            "Content-Type": "application/json",
-            "Accept": "audio/mpeg"
-        },
-        body: JSON.stringify({
-            text: prompt,
-            duration_seconds: durationSeconds,
-            prompt_influence: 0.5
-        })
-    });
-
-    if (!res.ok) {
-        const err = await res.text();
-        throw new Error(`ElevenLabs music/SFX error: ${err}`);
-    }
-
-    const buffer = await res.buffer();
-    fs.writeFileSync(outputPath, buffer);
+    throw new Error(
+        "ElevenLabs music/SFX generation requires a Creator+ plan. " +
+        "Skip this step and proceed with video_assemble using voiceover only. " +
+        "The video will still work without background music."
+    );
 }
+
 
 export const elevenlabsAudioTool = {
     name: "elevenlabs_audio",
