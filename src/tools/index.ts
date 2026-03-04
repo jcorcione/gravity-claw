@@ -70,6 +70,7 @@ import { youtubeScriptGeneratorTool } from "./youtube-script-generator.js";
 import { comfyuiGenerateTool } from "./comfyui-generate.js";
 import { elevenlabsAudioTool } from "./elevenlabs-audio.js";
 import { baserowContentTool } from "./baserow-content.js";
+import { browserAgentTool } from "./browser-agent.js";
 
 // Prevent multiple registrations if file is re-imported
 if (registry.size === 0) {
@@ -93,4 +94,5 @@ if (registry.size === 0) {
     registerTool(comfyuiGenerateTool);
     registerTool(elevenlabsAudioTool);
     registerTool(baserowContentTool);
+    registerTool(browserAgentTool);
 }

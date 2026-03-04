@@ -1,0 +1,30 @@
+[phases.setup]
+nixPkgs = [
+  "chromium",
+  "xorg.libX11",
+  "xorg.libXcomposite",
+  "xorg.libXdamage",
+  "xorg.libXext",
+  "xorg.libXfixes",
+  "xorg.libXrandr",
+  "mesa",
+  "pango",
+  "nss",
+  "nspr",
+  "atk",
+  "cups",
+  "dbus",
+  "expat",
+  "libdrm",
+  "libxkbcommon",
+  "alsaLib"
+]
+
+[phases.install]
+cmds = ["npm ci", "npx agent-browser install --yes 2>/dev/null || true"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "node dist/src/server.js"
