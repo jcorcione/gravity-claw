@@ -170,8 +170,6 @@ export async function initMcpServers(): Promise<void> {
                 continue;
             }
 
-           }
-
             try {
                 await connectMcpServer(config);
             } catch (err) {
