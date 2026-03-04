@@ -19,41 +19,32 @@ let botInstance: Bot | null = null;
 
 // ─── Intelligence Briefing Prompt ──────────────────────────────
 
-const BRIEFING_PROMPT = `You are running John Corcione's hourly intelligence briefing. Execute the following steps in order and compile a clean report. Do NOT show raw JSON or tool call details — only a clean formatted summary.
+const BRIEFING_PROMPT = `You are running John Corcione's morning intelligence briefing. Execute the following steps and compile a clean report. Do NOT show raw JSON or tool call details — only a clean formatted summary.
 
 STEP 1 — RECRUITER EMAIL SCAN:
-Run scan_recruiter_emails (max 10). Report: how many emails scanned, any recruiter contacts found, any cover letters drafted.
+Run scan_recruiter_emails (max 10). Report: how many emails, any recruiter contacts found, any cover letters drafted.
 
-STEP 2 — YOUTUBE CHANNEL PERFORMANCE:
-Run youtube_analytics for channel="@gracenoteinspriations" and then for channel="@gigawerx" (type="overview"). Report key stats: subscribers, recent views, any notable trends.
+STEP 2 — TRENDING TOPICS (use Tavily MCP search):
+- Search: "trending Christian faith prayer encouragement YouTube Shorts 2026"
+- Search: "trending AI tools freelancing gig economy apps 2026"
+Report 2-3 actionable trending topics per channel.
 
-STEP 3 — TRENDING TOPICS (use Tavily search MCP):
-- Search: "trending Christian faith prayer YouTube Shorts 2026"
-- Search: "trending AI tools freelancing gig economy 2026"
-Report the 2-3 most actionable trending topics found for each channel.
+STEP 3 — TODAY'S CALENDAR:
+Run search_calendar for today. Report any events or deadlines.
 
-STEP 4 — TODAY'S CALENDAR:
-Run search_calendar for today's date. Report any events, deadlines, or reminders.
+STEP 4 — COMPILE & SEND:
+Format the briefing as:
 
-STEP 5 — BASEROW PIPELINE STATUS:
-Run baserow_content (action=list_pending). Report how many videos are pending in each channel.
+☀️ *Good morning John — Gravity Claw Intel Brief* [date]
 
-STEP 6 — COMPILE REPORT:
-Send John a clean briefing using this format:
+📧 *Email:* [recruiter summary or "Inbox clear"]
+🔥 *Grace Note Trends:* [topic 1, topic 2]
+⚡ *Gigawerx Trends:* [topic 1, topic 2]
+📅 *Today:* [events or "Nothing scheduled"]
 
-☀️ *Gravity Claw Intel Brief* — [time/date]
+Keep it under 10 sentences. Only flag what needs attention.`;
 
-📧 *Email Scan:* [summary]
-📺 *YouTube:* [brief channel stats]
-🔥 *Hot Topics:*
-• Grace Note: [topic]
-• Gigawerx: [topic]
-📅 *Calendar:* [today's events or "Nothing scheduled"]
-🎬 *Pipeline:* [X videos pending]
-
-Keep it tight — 10 sentences max total. Only flag things that need John's attention.`;
-
-const CHECKIN_PROMPT = `Quick proactive check-in from Gravity Claw. Use get_current_time to get the time. Run search_semantic_memory for any pending tasks or reminders. Send a 1-2 sentence check-in only if there's something worth flagging. Otherwise skip.`;
+const CHECKIN_PROMPT = `Quick check-in from Gravity Claw. Use get_current_time to get the time. Run search_semantic_memory for any pending tasks or reminders. Send a 1-2 sentence check-in only if there's something worth flagging. Otherwise stay quiet.`;
 
 // ─── Send Proactive Message ──────────────────────────────
 
@@ -135,9 +126,9 @@ export function stopAllJobs(): void {
 export async function initHeartbeat(bot: Bot): Promise<void> {
     botInstance = bot;
 
-    // Built-in: Hourly intelligence briefing (every 60 minutes)
-    const morningCron = process.env["HEARTBEAT_MORNING_CRON"] ?? "0 * * * *";
-    startJob("builtin_morning", morningCron, BRIEFING_PROMPT, "Hourly Intel Brief");
+    // Built-in: Morning intelligence briefing (8AM ET = 13:00 UTC)
+    const morningCron = process.env["HEARTBEAT_MORNING_CRON"] ?? "0 13 * * *";
+    startJob("builtin_morning", morningCron, BRIEFING_PROMPT, "Morning Intel Brief");
 
     // Built-in: Periodic check-in (optional, disabled by default)
     const checkinEnabled = process.env["HEARTBEAT_CHECKIN_ENABLED"] === "true";
