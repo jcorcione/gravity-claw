@@ -123,9 +123,11 @@ async function buildSystemPrompt(): Promise<string> {
 // ─── Free model rotation for 429 fallback ───────────────
 // Only models confirmed to support function/tool calling via OpenRouter
 const FREE_MODEL_ROTATION = [
-    "google/gemini-2.0-flash-thinking-exp:free",
-    "meta-llama/llama-3.3-70b-instruct:free",
-    "deepseek/deepseek-r1-0528:free",
+    // Best free tool-calling fallbacks (priority order)
+    "moonshotai/kimi-k2:free",                     // #1 — best free agentic tool use
+    "google/gemini-2.0-flash-thinking-exp:free",   // #2 — strong reasoning fallback
+    "meta-llama/llama-3.3-70b-instruct:free",      // #3 — reliable general fallback
+    "deepseek/deepseek-r1:free",                   // #4 — deep reasoning tasks
 ];
 
 // ─── Chat ────────────────────────────────────────────────
