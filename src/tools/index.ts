@@ -75,6 +75,7 @@ import { videoCompileTool } from "./video-compile.js";
 import { edgeTtsTool } from "./edge-tts.js";
 import { r2UploadTool } from "./r2-upload.js";
 import { youtubeUploadTool } from "./youtube-upload.js";
+import { videoAssembleTool } from "./video-assemble.js";
 
 // Prevent multiple registrations if file is re-imported
 if (registry.size === 0) {
@@ -103,4 +104,5 @@ if (registry.size === 0) {
     registerTool(edgeTtsTool);
     registerTool(r2UploadTool);
     registerTool(youtubeUploadTool);
+    registerTool(videoAssembleTool);
 }
