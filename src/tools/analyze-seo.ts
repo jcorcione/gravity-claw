@@ -77,10 +77,14 @@ export const analyzeSeoTool = {
             const psiUrl = new URL("https://www.googleapis.com/pagespeedonline/v5/runPagespeed");
             psiUrl.searchParams.set("url", url);
             psiUrl.searchParams.set("strategy", strategy);
-            psiUrl.searchParams.set("category", "performance");
-            psiUrl.searchParams.set("category", "seo");
-            psiUrl.searchParams.set("category", "accessibility");
-            psiUrl.searchParams.set("category", "best-practices");
+            psiUrl.searchParams.append("category", "performance");
+            psiUrl.searchParams.append("category", "seo");
+            psiUrl.searchParams.append("category", "accessibility");
+            psiUrl.searchParams.append("category", "best-practices");
+
+            if (process.env.GOOGLE_PAGESPEED_API_KEY) {
+                psiUrl.searchParams.set("key", process.env.GOOGLE_PAGESPEED_API_KEY);
+            }
 
             const psiRes = await fetch(psiUrl.toString());
             if (!psiRes.ok) throw new Error(`PSI HTTP ${psiRes.status}`);
@@ -105,6 +109,9 @@ export const analyzeSeoTool = {
         } catch (err: any) {
             console.error(`[analyze_seo] PageSpeed fetch failed for ${url}:`, err);
             psiData.error = err.message;
+            if (err.message.includes("429")) {
+                psiData.error += " (Rate limited by Google. Add GOOGLE_PAGESPEED_API_KEY to .env to fix this)";
+            }
         }
 
         return JSON.stringify({
