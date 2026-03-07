@@ -87,13 +87,19 @@ async function buildSystemPrompt(agent: AgentName): Promise<string> {
     return prompt;
 }
 
-// ─── Free model rotation for 429 fallback ───────────────
+// ─── Default Model Rotation for 429 Fallback ────────────
 const FREE_MODEL_ROTATION = [
-    "stepfun/step-3.5-flash:free",                  // Flash — fast default
-    "moonshotai/kimi-k2:free",                      // Kimi — best free tool-calling
-    "google/gemini-2.0-flash-thinking-exp:free",    // Gemini — reasoning fallback
-    "meta-llama/llama-3.3-70b-instruct:free",       // Llama — reliable general
-    "deepseek/deepseek-r1:free",                    // DeepSeek — deep reasoning
+    "meta-llama/llama-3.3-70b-instruct",            // Groq LPU / Llama - reliable general
+    "openai/gpt-4o-mini",                           // Very strong tool calling, ultra cheap
+    "google/gemini-2.5-flash",                      // Fast agentic fallback
+    "anthropic/claude-3-haiku",                     // Fast Claude fallback
+];
+
+// Router needs fast, precise instruction followers
+const ROUTER_MODEL_ROTATION = [
+    "meta-llama/llama-3.3-70b-instruct",            // Best instruction following / fastest Groq routing
+    "openai/gpt-4o-mini",                           // Bulletproof JSON/Routing
+    "google/gemini-2.5-flash",                      // Lightning fast fallback
 ];
 
 // ─── Router Logic ─────────────────────────────────────────
@@ -111,26 +117,40 @@ Respond with EXACTLY one of these words in raw text (no reasoning, no markdown):
 
 User Message: "${userMessage}"`;
 
-    try {
-        const result = await client.chat.completions.create({
-            model: "meta-llama/llama-3.3-70b-instruct:free", // highly capable free router
-            messages: [{ role: "user", content: routingPrompt }],
-            max_tokens: 10,
-            temperature: 0.1
-        });
+    for (const modelId of ROUTER_MODEL_ROTATION) {
+        try {
+            const result = await client.chat.completions.create({
+                model: modelId,
+                messages: [{ role: "user", content: routingPrompt }],
+                max_tokens: 10,
+                temperature: 0.1
+            });
 
-        const text = result.choices[0]?.message?.content?.toUpperCase() || "MANAGER";
-        if (text.includes("VIDEO_CONTENT")) return "VIDEO_CONTENT";
-        if (text.includes("COMM")) return "COMM";
-        if (text.includes("SEO_BLOG")) return "SEO_BLOG";
-        if (text.includes("APP_FACTORY")) return "APP_FACTORY";
-        if (text.includes("LEAD_GEN")) return "LEAD_GEN";
-        if (text.includes("ADMIN")) return "ADMIN";
+            const text = result.choices[0]?.message?.content?.toUpperCase() || "MANAGER";
+            console.log(`[Router Debug] ${modelId} returned: ${text}`);
 
-        return "MANAGER";
-    } catch (e) {
-        console.error("Router error, falling back to MANAGER", e);
+            if (text.includes("VIDEO_CONTENT")) return "VIDEO_CONTENT";
+            if (text.includes("COMM")) return "COMM";
+            if (text.includes("SEO_BLOG")) return "SEO_BLOG";
+            if (text.includes("APP_FACTORY")) return "APP_FACTORY";
+            if (text.includes("LEAD_GEN")) return "LEAD_GEN";
+            if (text.includes("ADMIN")) return "ADMIN";
+
+            if (text.includes("MANAGER")) return "MANAGER";
+
+            // If the model outputs nonsense, it's safer to loop to the next model
+            console.warn(`Router ${modelId} output unrecognized text, trying next...`);
+        } catch (e: any) {
+            const status = e?.status ?? e?.response?.status;
+            if (status === 429 || status === 451 || status === 404 || status === 400 || status === 502) {
+                console.warn(`  ⚠️ Router Model ${modelId} failed (${status}), rotating...`);
+                continue;
+            }
+            console.error(`Router error on ${modelId}`, e.message);
+        }
     }
+
+    console.warn("All router models failed, defaulting to MANAGER");
     return "MANAGER";
 }
 
@@ -180,8 +200,8 @@ export async function chat(
             return result;
         } catch (err: any) {
             const status = err?.status ?? err?.response?.status;
-            if (status === 429 || status === 451) {
-                console.warn(`  ⚠️ Model ${modelId} rate-limited (${status}), rotating...`);
+            if (status === 429 || status === 451 || status === 404 || status === 400 || status === 502) {
+                console.warn(`  ⚠️ Model ${modelId} failed (${status}), rotating...`);
                 lastError = err;
                 await new Promise(r => setTimeout(r, 500));
                 continue;
