@@ -9,7 +9,7 @@ import { getActiveModel } from "./models.js";
 
 async function main() {
     console.log("=========================================");
-    console.log("       GRAVITY CLAW - TERMINAL UI       ");
+    console.log("       AgenticHQ - TERMINAL UI       ");
     console.log("=========================================\n");
 
     // Initialize systems

@@ -77,6 +77,8 @@ import { r2UploadTool } from "./r2-upload.js";
 import { youtubeUploadTool } from "./youtube-upload.js";
 import { videoAssembleTool } from "./video-assemble.js";
 import { createShortVideoTool } from "./create-short-video.js";
+import { humanizeTextTool } from "./humanize-text.js";
+import { redditScraperTool } from "./reddit-scraper.js";
 
 // Prevent multiple registrations if file is re-imported
 if (registry.size === 0) {
@@ -107,4 +109,6 @@ if (registry.size === 0) {
     registerTool(youtubeUploadTool);
     registerTool(videoAssembleTool);
     registerTool(createShortVideoTool);
+    registerTool(humanizeTextTool);
+    registerTool(redditScraperTool);
 }

@@ -185,7 +185,7 @@ export const createShortVideoTool: Tool = {
                 console.log(`[Macro - Step 6/6] Sending Telegram Notification...`);
                 // Split multi-user IDs if multiple are allowed, grab first one
                 const mainChatId = chatId.split(",")[0].trim();
-                const msg = `🎬 *Gravity Claw Video Completed!*\n\n*Channel:* ${channel}\n*Topic:* ${topic}\n*Video Path:* \`${finalVideoPath}\``;
+                const msg = `🎬 *AgenticHQ Video Completed!*\n\n*Channel:* ${channel}\n*Topic:* ${topic}\n*Video Path:* \`${finalVideoPath}\``;
                 await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },

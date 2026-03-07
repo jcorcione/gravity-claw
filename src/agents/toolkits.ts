@@ -1,0 +1,75 @@
+import { getAllTools, type Tool } from "../tools/index.js";
+import { getMcpTools } from "../mcp.js";
+
+type AgentName = "MANAGER" | "VIDEO_CONTENT" | "COMM" | "SEO_BLOG" | "APP_FACTORY" | "LEAD_GEN" | "ADMIN";
+
+export function getAgentTools(agent: AgentName): Tool[] {
+    const allNativeTools = getAllTools();
+    const allMcpTools = getMcpTools();
+    const allTools = [...allNativeTools, ...allMcpTools];
+
+    const getToolsByName = (names: string[]) => allTools.filter(t => names.includes(t.name));
+    const getMcpToolsByPrefix = (prefix: string) => allTools.filter(t => t.name.startsWith(prefix));
+
+    switch (agent) {
+        case "MANAGER":
+            return getToolsByName([
+                "get_current_time",
+                "upsert_user_fact",
+                "save_semantic_memory",
+                "search_semantic_memory",
+                "request_smarter_model",
+                "check_openrouter_balance"
+            ]);
+
+        case "VIDEO_CONTENT":
+            return getToolsByName([
+                "create_short_video",
+                "youtube_script_generator",
+                "youtube_analytics",
+                "supabase_content",
+                "comfyui_generate",
+                "elevenlabs_audio",
+                "edge_tts",
+                "video_assemble",
+                "video_compile",
+                "r2_upload",
+                "youtube_upload"
+            ]);
+
+        case "COMM":
+            return [
+                ...getToolsByName(["scan_recruiter_emails", "search_calendar", "manage_calendar"]),
+                ...getMcpToolsByPrefix("mcp_gmail_")
+            ];
+
+        case "SEO_BLOG":
+            return [
+                ...getToolsByName(["search_web", "analyze_seo", "browser_agent", "humanize_text"]),
+                ...getMcpToolsByPrefix("mcp_tavily_")
+            ];
+
+        case "APP_FACTORY":
+            return [
+                ...getToolsByName(["reddit_scraper", "search_web"]),
+                ...getMcpToolsByPrefix("mcp_tavily_")
+            ];
+
+        case "LEAD_GEN":
+            return [
+                ...getToolsByName(["search_web"]),
+                ...getMcpToolsByPrefix("mcp_gmail_create_draft") // Only draft access
+            ];
+
+        case "ADMIN":
+            return getToolsByName([
+                "run_shell",
+                "read_file",
+                "write_file",
+                "list_directory"
+            ]);
+
+        default:
+            return [];
+    }
+}

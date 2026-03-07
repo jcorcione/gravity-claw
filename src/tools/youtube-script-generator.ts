@@ -122,7 +122,7 @@ async function generateScript(
             "Authorization": `Bearer ${key}`,
             "Content-Type": "application/json",
             "HTTP-Referer": "https://gravity-claw-production-d161.up.railway.app",
-            "X-Title": "Gravity Claw Script Generator",
+            "X-Title": "AgenticHQ Script Generator",
         },
         body: JSON.stringify({
             model: CREATIVE_MODEL,

@@ -12,7 +12,7 @@ import { startDiscordBot, stopDiscordBot } from "./discord.js";
 
 console.log(`
   ╔═══════════════════════════════════════╗
-  ║          🤖 GRAVITY CLAW             ║
+  ║          🤖 AgenticHQ             ║
   ║     Personal AI Agent — Level 7      ║
   ╚═══════════════════════════════════════╝
 `);
@@ -73,7 +73,7 @@ await startDiscordBot();
 // ─── Graceful Shutdown ───────────────────────────────────
 
 const shutdown = async () => {
-    console.log("\n👋 Shutting down Gravity Claw...");
+    console.log("\n👋 Shutting down AgenticHQ...");
     bot.stop();
     await stopDiscordBot();
     stopAllJobs();

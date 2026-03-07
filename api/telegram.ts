@@ -33,7 +33,7 @@ async function ensureInitialized() {
     });
 
     bot.command("help", async (ctx) => {
-        const helpText = `*🤖 Nexus AI Commands*
+        const helpText = `*🤖 AgenticHQ Commands*
 
 /start - Check if system is online
 /status - View system resources and API balances

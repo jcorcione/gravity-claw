@@ -5,10 +5,20 @@ import { getAllFacts, getTranscript } from "./memory-pg.js";
 import type { Tool } from "./tools/index.js";
 import fs from "fs/promises";
 import path from "path";
+import {
+    MANAGER_PROMPT,
+    VIDEO_AGENT_PROMPT,
+    COMM_AGENT_PROMPT,
+    SEO_BLOG_AGENT_PROMPT,
+    APP_FACTORY_AGENT_PROMPT,
+    LEAD_GEN_AGENT_PROMPT,
+    ADMIN_AGENT_PROMPT
+} from "./agents/prompts.js";
 
 // ─── Types ───────────────────────────────────────────────
 
 export type ChatMessage = OpenAI.ChatCompletionMessageParam;
+export type AgentName = "MANAGER" | "VIDEO_CONTENT" | "COMM" | "SEO_BLOG" | "APP_FACTORY" | "LEAD_GEN" | "ADMIN";
 
 // ─── Client ──────────────────────────────────────────────
 
@@ -16,100 +26,31 @@ const client = new OpenAI({
     baseURL: "https://openrouter.ai/api/v1",
     apiKey: config.openRouterApiKey,
     defaultHeaders: {
-        "X-Title": "Gravity Claw",
+        "X-Title": "AgenticHQ",
     },
 });
 
-const BASE_SYSTEM_PROMPT = `You are Gravity Claw (also called Jarvis), a personal AI assistant and content creation engine running as a Telegram bot for John Corcione.
+function getAgentPromptString(agent: AgentName): string {
+    switch (agent) {
+        case "VIDEO_CONTENT": return VIDEO_AGENT_PROMPT;
+        case "COMM": return COMM_AGENT_PROMPT;
+        case "SEO_BLOG": return SEO_BLOG_AGENT_PROMPT;
+        case "APP_FACTORY": return APP_FACTORY_AGENT_PROMPT;
+        case "LEAD_GEN": return LEAD_GEN_AGENT_PROMPT;
+        case "ADMIN": return ADMIN_AGENT_PROMPT;
+        case "MANAGER":
+        default: return MANAGER_PROMPT;
+    }
+}
 
-Personality & Communication Style:
-- Dry wit, Gen-X sensibility — direct, occasionally sarcastic, never corporate.
-- TLDR answers by default. Enough info to be useful, no fluff, no AI-speak.
-- Push back when something is a bad idea. Be loyal but honest.
-- You use tools without asking permission. Just do it.
-- You're honest about what you don't know — say so and move on.
-- Markdown sparingly (Telegram supports basic markdown only).
-- Never say "Certainly!", "Great question!", or any corporate filler. Just answer.
-
-───────────────────────────────────────
-JOHN CORCIONE — PROFESSIONAL PROFILE:
-───────────────────────────────────────
-- Location: Port Richey, FL (Tampa Bay Area) — open to remote/hybrid
-- Title: Senior IT / Telecom Project Manager & Scrum Master
-- Experience: 20 years — T-Mobile, JPMorgan Chase, Citibank
-- Target roles: Senior IT PM, Telecom/Network PM, Program Manager, Scrum Master, Cloud Migration PM
-- Industries: Telecom, Wireless, Financial Services, Fintech, Cloud/IT
-- Contact: jcorcione@gmail.com | 816-679-3032 | linkedin.com/in/jcorcione
-- Employment: Contract, Contract-to-Hire, Full-time
-- Communication style: Gen-X, direct, no fluff, no corporate jargon, practical outcomes
-
-RECRUITER EMAIL RESPONSE RULES (use when writing cover letters / replies):
-- STRONG FIT: Role is IT PM / Telecom PM / Program Manager / Scrum Master in telecom, financial services, or cloud. → Express clear interest, reference role title + telecom/IT/cloud background, ask for rate/remote/timeline details.
-- WEAK FIT: Adjacent roles (generic BA, junior PM, non-technical). → Polite pass, keep door open for better-fit senior roles.
-- NOT RELEVANT: Non-IT, sales, entry-level, spammy blast. → Brief decline or ignore.
-- Always sign: "Best regards, John Corcione | Senior IT / Telecom PM | 816-679-3032 | jcorcione@gmail.com"
-
-RESPONSE FORMAT RULES (CRITICAL):
-- NEVER include raw tool call details like "[tool] [tool_name] {...}" in your final response.
-- NEVER show JSON payloads or tool arguments in your reply to the user.
-- After using tools, give ONLY a clean, human-readable summary of what was accomplished.
-- Good: "✅ Script saved to Supabase row 232. Status set to script_ready."
-- Bad: "[tool] [supabase_content] {"action":"update","row_id":232...}"
-
-───────────────────────────────────────
-YOUTUBE CHANNELS (John owns both):
-───────────────────────────────────────
-1. GRACE NOTE INSPIRATIONS (@gracenoteinspirations)
-   - Channel ID: UCh5IUq3irUBvhR-PoZYh87Q
-   - Niche: Christian faith, spiritual encouragement, prayer, Bible verses
-   - Format: Faceless YouTube Shorts (15-45 seconds)
-   - Voice: Erika New Worship Voice (ElevenLabs ID: wIQlXk1pwcszdjmUYKyP)
-   - Script formula: Pain Point HOOK → Prayer/Bible Verse BODY → Strong CTA
-   - Thumbnail style: Dark moody background, warm golden light, cross motifs, no faces
-   - Channel parameter: "gracenote"
-
-2. THE GIGAWERX CHANNEL (@gigawerx)
-   - Channel ID: UC2INQGyEm01fNY3CUoJAGIg
-   - Niche: AI tools, gig economy, freelancing, tech, viral trends
-   - Format: Faceless YouTube Shorts (15-45 seconds)
-   - Voice: John's Voice Pro (ElevenLabs ID: 2EsgRiyQL1INfP0QD8HP)
-   - Script formula: Strong HOOK (stat/claim) → Problem/Solution LIST → Strong CTA
-   - Thumbnail style: Dark background, neon cyan accents, bold text overlays, no faces
-   - Channel parameter: "gigawerx"
-
-───────────────────────────────────────────────────────────────────────────
-CONTENT CREATION TOOLS (Use individually on request):
-───────────────────────────────────────
-John owns two YouTube channels:
-1. GRACE NOTE INSPIRATIONS (@gracenoteinspirations) - Christian faith, prayer, Bible verses. Shorts. Voice: Erika (wIQlXk1pwcszdjmUYKyP). Supabase channel="gracenote"
-2. THE GIGAWERX CHANNEL (@gigawerx) - AI tools, gig economy, freelancing. Shorts. Voice: John Pro (2EsgRiyQL1INfP0QD8HP). Supabase channel="gigawerx"
-
-Available tools - use as requested:
-- create_short_video: The MACRO tool. ALWAYS use this to create a video when asked. It handles script, image, voice, and assembly in ONE step.
-- supabase_content: Do NOT use this for video generation anymore. Only use if John explicitly asks to query the database.
-- youtube_script_generator: Write channel scripts
-- youtube_analytics: Pull live stats
-- comfyui_generate: Thumbnails (needs desktop + ComfyUI on)
-- elevenlabs_audio: Narration audio or music
-- video_assemble: Combine image + audio into MP4 (needs Flask compiler on desktop)
-- r2_upload: Upload to Cloudflare R2
-- youtube_upload: Upload MP4 to YouTube
-
-CRITICAL: When asked to "create a video", use the \`create_short_video\` tool. Do NOT try to manually chain supabase, script gen, comfyui, etc.
-
-───
-MEMORY INSTRUCTIONS:
-───────────────────────────────────────
-- You have a 3-tier memory system:
-  1. Transcript: The last ~20 messages are automatically provided below.
-  2. Facts: Hard facts from the user are provided below. To save new facts or update them, use upsert_user_fact.
-  3. Semantic: For abstract concepts, ideas, or overarching summaries, use save_semantic_memory and search_semantic_memory.`;
-
-async function buildSystemPrompt(): Promise<string> {
+async function buildSystemPrompt(agent: AgentName): Promise<string> {
     const facts = await getAllFacts();
-    const transcript = await getTranscript(20);
 
-    let prompt = BASE_SYSTEM_PROMPT;
+    // We fetch fewer transcript messages for sub-agents to avoid context poisoning
+    const transcriptLimit = agent === "MANAGER" ? 20 : 10;
+    const transcript = await getTranscript(transcriptLimit);
+
+    let prompt = getAgentPromptString(agent);
 
     try {
         const statePath = path.join(process.cwd(), "system_state.md");
@@ -127,7 +68,19 @@ async function buildSystemPrompt(): Promise<string> {
     }
 
     if (transcript.length > 0) {
-        const transcriptLines = transcript.map((m) => `[${m.role}] ${m.content}`).join("\n\n");
+        let transcriptLines = "";
+        // If it's a sub-agent, don't confuse it with previous tool calls from irrelevant domains.
+        // Just show the raw conversation flow.
+        const filteredTranscript = transcript.filter(m => {
+            if (agent !== "MANAGER" && m.role === "tool") return false;
+            return true;
+        });
+
+        transcriptLines = filteredTranscript.map((m) => {
+            if (m.role === "tool") return `[tool output: ${m.content?.substring(0, 100)}...]`;
+            return `[${m.role}] ${m.content}`;
+        }).join("\n\n");
+
         prompt += `\n\nRECENT TRANSCRIPT:\n${transcriptLines}`;
     }
 
@@ -135,9 +88,7 @@ async function buildSystemPrompt(): Promise<string> {
 }
 
 // ─── Free model rotation for 429 fallback ───────────────
-// Only models confirmed to support function/tool calling via OpenRouter
 const FREE_MODEL_ROTATION = [
-    // Fallback order when primary model hits rate limit (429)
     "stepfun/step-3.5-flash:free",                  // Flash — fast default
     "moonshotai/kimi-k2:free",                      // Kimi — best free tool-calling
     "google/gemini-2.0-flash-thinking-exp:free",    // Gemini — reasoning fallback
@@ -145,11 +96,45 @@ const FREE_MODEL_ROTATION = [
     "deepseek/deepseek-r1:free",                    // DeepSeek — deep reasoning
 ];
 
+// ─── Router Logic ─────────────────────────────────────────
+
+export async function routeUserIntent(userMessage: string): Promise<AgentName> {
+    const routingPrompt = `Analyze the user's message and pick ONE domain expert to handle it.
+Respond with EXACTLY one of these words in raw text (no reasoning, no markdown):
+- MANAGER (Basic greeting, simple memory fact updates)
+- VIDEO_CONTENT (YouTube, video generation, elevenlabs, thumbnails, scripts)
+- COMM (Scanning emails, drafting recruiter emails, managing google calendar)
+- SEO_BLOG (Writing blog posts, SEO analysis, browsing the web for research)
+- APP_FACTORY (Brainstorming apps, scraping reddit for pain points)
+- LEAD_GEN (Hunting for B2B leads or freelance PM roles)
+- ADMIN (Running shell scripts, reading local files)
+
+User Message: "${userMessage}"`;
+
+    try {
+        const result = await client.chat.completions.create({
+            model: "stepfun/step-3.5-flash:free", // extremely fast & cheap routing
+            messages: [{ role: "user", content: routingPrompt }],
+            max_tokens: 10,
+            temperature: 0.1
+        });
+
+        const text = result.choices[0]?.message?.content?.trim().toUpperCase() || "MANAGER";
+        if (["MANAGER", "VIDEO_CONTENT", "COMM", "SEO_BLOG", "APP_FACTORY", "LEAD_GEN", "ADMIN"].includes(text)) {
+            return text as AgentName;
+        }
+    } catch (e) {
+        console.error("Router error, falling back to MANAGER", e);
+    }
+    return "MANAGER";
+}
+
 // ─── Chat ────────────────────────────────────────────────
 
 export async function chat(
     messages: ChatMessage[],
-    tools: Tool[]
+    tools: Tool[],
+    agent: AgentName = "MANAGER"
 ): Promise<OpenAI.ChatCompletion> {
     const openAiTools: OpenAI.ChatCompletionTool[] = tools.map((t) => ({
         type: "function" as const,
@@ -160,13 +145,12 @@ export async function chat(
         },
     }));
 
-    const systemPrompt = await buildSystemPrompt();
+    const systemPrompt = await buildSystemPrompt(agent);
     const builtMessages = [
         { role: "system" as const, content: systemPrompt },
         ...messages,
     ];
 
-    // Build ordered list: active model first, then free rotation fallbacks
     const primary = getActiveModel();
     const modelsToTry = [
         primary.modelId,
@@ -177,16 +161,14 @@ export async function chat(
 
     for (const modelId of modelsToTry) {
         try {
-            console.log(`  🧠 Trying model: ${modelId}`);
+            console.log(`  🧠 Trying model: ${modelId} for Agent: ${agent}`);
             const result = await client.chat.completions.create({
                 model: modelId,
                 max_tokens: config.llmMaxTokens,
                 messages: builtMessages,
                 tools: openAiTools.length > 0 ? openAiTools : undefined,
             });
-            // Skip models that return empty/missing choices
             if (!result.choices || result.choices.length === 0) {
-                console.warn(`  ⚠️ Model ${modelId} returned empty choices, rotating...`);
                 lastError = new Error(`Model ${modelId} returned no choices`);
                 continue;
             }
@@ -196,13 +178,12 @@ export async function chat(
             if (status === 429 || status === 451) {
                 console.warn(`  ⚠️ Model ${modelId} rate-limited (${status}), rotating...`);
                 lastError = err;
-                await new Promise(r => setTimeout(r, 500)); // brief pause
+                await new Promise(r => setTimeout(r, 500));
                 continue;
             }
-            throw err; // Non-rate-limit errors bubble up immediately
+            throw err;
         }
     }
 
     throw lastError ?? new Error("All models exhausted — rate limited across all free providers.");
 }
-

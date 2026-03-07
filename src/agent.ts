@@ -1,10 +1,10 @@
 import { config } from "./config.js";
-import { chat, type ChatMessage } from "./llm.js";
-import { getAllTools, executeTool } from "./tools/index.js";
-import { getMcpTools } from "./mcp.js";
+import { chat, routeUserIntent, type ChatMessage } from "./llm.js";
+import { executeTool } from "./tools/index.js";
 import { EscalationError } from "./errors.js";
 import { getFallbackSmarterModel, setActiveModel } from "./models.js";
 import { saveMessage } from "./memory-pg.js";
+import { getAgentTools } from "./agents/toolkits.js";
 
 // ─── Agent Loop ──────────────────────────────────────────
 
@@ -17,17 +17,19 @@ export async function runAgentLoop(userMessage: string, userId: string = "defaul
         { role: "user", content: userMessage },
     ];
 
+    // Determine intent once at the start of the loop
+    const targetAgent = await routeUserIntent(userMessage);
+    console.log(`\n  🎯 Routed to Sub-Agent: [${targetAgent}]`);
+
     // Wrap in an escalation loop: if escalated, switch models and start from the top.
     while (true) {
-        // Merge local tools + MCP tools
-        const localTools = getAllTools();
-        const mcpTools = getMcpTools();
-        const allTools = [...localTools, ...mcpTools];
+        // Fetch specific agent tools
+        const agentTools = getAgentTools(targetAgent);
 
         let escalationTriggered = false;
 
         for (let iteration = 0; iteration < config.maxAgentIterations; iteration++) {
-            const response = await chat(messages, allTools);
+            const response = await chat(messages, agentTools, targetAgent);
             const choice = response.choices[0];
 
             if (!choice) {
@@ -56,11 +58,10 @@ export async function runAgentLoop(userMessage: string, userId: string = "defaul
 
             // Execute each tool call and append results
             for (const call of message.tool_calls) {
-                // Only handle function tool calls (skip custom tool types)
                 if (call.type !== "function") continue;
 
                 const toolName = call.function.name;
-                console.log(`  🔧 Tool call: ${toolName}`);
+                console.log(`  🔧 [${targetAgent}] Tool call: ${toolName}`);
 
                 let parsedArgs: Record<string, unknown> = {};
                 try {
@@ -70,15 +71,18 @@ export async function runAgentLoop(userMessage: string, userId: string = "defaul
                 }
 
                 try {
-                    // Route: MCP tools use their own execute, local tools use the registry
-                    const mcpTool = mcpTools.find((t) => t.name === toolName);
-                    const result = mcpTool
-                        ? await mcpTool.execute(parsedArgs)
+                    const foundTool = agentTools.find(t => t.name === toolName);
+                    if (!foundTool) {
+                        throw new Error(`Tool ${toolName} is not available to the ${targetAgent} agent.`);
+                    }
+
+                    const isMcp = toolName.startsWith("mcp_");
+                    const result = isMcp
+                        ? await foundTool.execute(parsedArgs)
                         : await executeTool(toolName, parsedArgs, { userId });
 
                     console.log(`  ✅ Tool result: ${result.substring(0, 100)}...`);
 
-                    // Append tool result as a tool message (OpenAI format)
                     if (!skipMemory) {
                         await saveMessage("tool", `[${toolName}] ${result}`, userId);
                     }
@@ -88,8 +92,8 @@ export async function runAgentLoop(userMessage: string, userId: string = "defaul
                         content: result,
                     });
                 } catch (err) {
-                    if (err instanceof EscalationError) {
-                        console.log(`\n  🚀 ESCALATION TRIGGERED: ${err.reason}`);
+                    if (err && typeof err === 'object' && 'name' in err && err.name === 'EscalationError') {
+                        console.log(`\n  🚀 ESCALATION TRIGGERED: ${(err as EscalationError).reason}`);
                         const smarter = getFallbackSmarterModel();
                         console.log(`  🧠 Switching active model to: ${smarter.alias}`);
                         setActiveModel(smarter.alias);
@@ -114,12 +118,10 @@ export async function runAgentLoop(userMessage: string, userId: string = "defaul
 
         if (escalationTriggered) {
             // Remove the assistant's tool call attempts so the smarter model starts fresh
-            // We want to remove everything from messages since the user message
             messages.splice(1);
             continue; // restart the while(true) loop
         }
 
-        // Safety: hit max iterations
         return "⚠️ I hit the maximum number of reasoning steps. Here's what I was working on — try rephrasing your request if I didn't finish.";
     }
 }

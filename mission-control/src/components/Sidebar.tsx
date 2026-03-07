@@ -51,7 +51,7 @@ export default function Sidebar() {
                     </div>
                     <div>
                         <div style={{ fontWeight: 700, fontSize: "0.9rem", color: "var(--text-primary)", lineHeight: 1.2 }}>
-                            Gravity Claw
+                            AgenticHQ
                         </div>
                         <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", fontFamily: "JetBrains Mono, monospace" }}>
                             Mission Control v0.2

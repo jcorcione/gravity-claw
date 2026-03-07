@@ -43,7 +43,7 @@ Run search_calendar for today. Report any events or deadlines.
 STEP 6 — COMPILE & SEND:
 Format the briefing as:
 
-☀️ *Good morning John — Gravity Claw Intel Brief* [date]
+☀️ *Good morning John — AgenticHQ Intel Brief* [date]
 
 📧 *Email:* [summary or "Inbox clear"]
 🌐 *JCorcione.com:* [latest post or content]
@@ -54,7 +54,7 @@ Format the briefing as:
 
 Keep it tight — under 15 sentences total. Only flag what needs John's attention.`;
 
-const CHECKIN_PROMPT = `Quick check-in from Gravity Claw. Use get_current_time to get the time. Run search_semantic_memory for any pending tasks or reminders. Send a 1-2 sentence check-in only if there's something worth flagging. Otherwise stay quiet.`;
+const CHECKIN_PROMPT = `Quick check-in from AgenticHQ. Use get_current_time to get the time. Run search_semantic_memory for any pending tasks or reminders. Send a 1-2 sentence check-in only if there's something worth flagging. Otherwise stay quiet.`;
 
 // ─── Send Proactive Message ──────────────────────────────
 

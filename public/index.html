@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus AI — Service Command</title>
+    <title>AgenticHQ — Multi-Agent Interface</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="style.css">
     <!-- Google Fonts for a sleek modern look -->
@@ -53,27 +53,47 @@
 
     <!-- Main Chat Interface (Hidden initially) -->
     <div id="chat-app">
-        <header>
-            <div class="header-content">
-                <div class="status-indicator"></div>
-                <h2>Nexus AI</h2>
-                <button id="logout-btn"
-                    style="background:var(--bg-secondary); color:var(--text-secondary); border:1px solid var(--border-color); padding:4px 8px; border-radius:4px; font-size:12px; cursor:pointer;">Sign
-                    Out</button>
+        <!-- Agent Roster Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header" style="padding: 20px; border-bottom: 1px solid var(--border-dim);">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="status-indicator"></div>
+                    <h3 style="letter-spacing: 1px;">AgenticHQ</h3>
+                </div>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top:5px;">Multi-Agent Roster</p>
             </div>
-        </header>
+            <ul class="agent-list">
+                <li class="agent-item"><span class="agent-icon">🧠</span><div><h4>Manager</h4><p>High-Level Routing</p></div></li>
+                <li class="agent-item"><span class="agent-icon">🎬</span><div><h4>Video Content</h4><p>YouTube & Media</p></div></li>
+                <li class="agent-item"><span class="agent-icon">📧</span><div><h4>Communications</h4><p>Gmail & Calendar</p></div></li>
+                <li class="agent-item"><span class="agent-icon">✍️</span><div><h4>SEO & Blog</h4><p>Analysis & Copy</p></div></li>
+                <li class="agent-item"><span class="agent-icon">💡</span><div><h4>App Factory</h4><p>Reddit Ideation</p></div></li>
+                <li class="agent-item"><span class="agent-icon">🤝</span><div><h4>Lead Gen</h4><p>Outreach & Hunting</p></div></li>
+                <li class="agent-item"><span class="agent-icon">⚙️</span><div><h4>Admin DevOps</h4><p>System Files</p></div></li>
+            </ul>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="chat-main">
+            <header>
+                <div class="header-content">
+                    <h2>Active Session</h2>
+                    <button id="logout-btn"
+                        style="background:var(--bg-secondary); color:var(--text-secondary); border:1px solid var(--border-color); padding:4px 8px; border-radius:4px; font-size:12px; cursor:pointer;">Sign Out</button>
+                </div>
+            </header>
 
         <main id="chat-window">
             <div class="message system-msg">
                 <div class="msg-content">
-                    Identity verified. Nexus AI is online and ready for operations.
+                    Identity verified. AgenticHQ router sequence initiated.
                 </div>
             </div>
             <!-- Dynamic messages will be appended here -->
         </main>
 
         <div class="input-area">
-            <textarea id="prompt-input" placeholder="Message Nexus..." rows="1"></textarea>
+            <textarea id="prompt-input" placeholder="Message AgenticHQ..." rows="1"></textarea>
             <button id="send-btn" title="Send (Enter)">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -83,9 +103,10 @@
             </button>
         </div>
         <div class="legal-footer">
-            &copy; 2026 Nexus AI Solutions. All Rights Reserved. Proprietary & Confidential. <a href="#">Terms of
+            &copy; 2026 AgenticHQ Solutions. All Rights Reserved. Proprietary & Confidential. <a href="#">Terms of
                 Service</a>
         </div>
+        </div> <!-- End chat-main -->
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>

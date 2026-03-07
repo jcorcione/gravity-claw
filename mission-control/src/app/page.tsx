@@ -76,7 +76,7 @@ export default function CommandCenter() {
     <>
       <div className="page-header fade-in">
         <h1>Command Center</h1>
-        <p>Real-time overview of your Nexus AI agent</p>
+        <p>Real-time overview of your AgenticHQ agent</p>
       </div>
 
       {/* Stat Cards */}

@@ -1,13 +1,13 @@
-# Nexus AI (Gravity Claw) — Quickstart Guide
+# AgenticHQ (AgenticHQ) — Quickstart Guide
 
-Welcome to **Nexus AI**, a multi-tenant, cloud-native personal AI assistant powered by Groq, Claude, Supabase, Pinecone, and Vercel. 
+Welcome to **AgenticHQ**, a multi-tenant, cloud-native personal AI assistant powered by Groq, Claude, Supabase, Pinecone, and Vercel. 
 
 This guide will help you understand how to access and interact with your AI assistant depending on your environment.
 
 ---
 
 ## 1. Web Portal (For Deep Work & Family Members)
-The Web Portal is the primary way for you and any authorized users to interact with the Nexus AI chat interface. It features a rich, native ChatGPT-style experience and fully supports memory isolation.
+The Web Portal is the primary way for you and any authorized users to interact with the AgenticHQ chat interface. It features a rich, native ChatGPT-style experience and fully supports memory isolation.
 
 * **URL:** [https://gravity-claw-sigma.vercel.app](https://gravity-claw-sigma.vercel.app)
 * **How to login:** 
@@ -33,7 +33,7 @@ The Admin Dashboard is a specialized "Command Center" designed exclusively for t
 ---
 
 ## 3. Telegram (For On-The-Go & Voice Notes)
-Because Nexus AI is integrated with Groq Whisper, it can handle robust voice transcriptions. Telegram is the best way to interact on mobile.
+Because AgenticHQ is integrated with Groq Whisper, it can handle robust voice transcriptions. Telegram is the best way to interact on mobile.
 
 * **Active Bot:** `@JCAntiGravBot` ← use this (Railway backend)
 * **Legacy Bot:** `@JohsClawBot` (old EC2 instance — retiring soon, do not use)
@@ -49,7 +49,7 @@ Because Nexus AI is integrated with Groq Whisper, it can handle robust voice tra
 ---
 
 ## 5. Terminal UI (For Developers)
-If you are actively coding or managing the server infrastructure, you can talk to Nexus AI without leaving your command line.
+If you are actively coding or managing the server infrastructure, you can talk to AgenticHQ without leaving your command line.
 
 * **How to run:**
   ```bash
@@ -60,8 +60,8 @@ If you are actively coding or managing the server infrastructure, you can talk t
 
 ---
 
-### Core Principles of Nexus AI
-1. **Factual Memory:** If you tell Nexus AI a specific fact (e.g., "I just learned React"), it will permanently save it to your Supabase profile so it never asks again.
+### Core Principles of AgenticHQ
+1. **Factual Memory:** If you tell AgenticHQ a specific fact (e.g., "I just learned React"), it will permanently save it to your Supabase profile so it never asks again.
 2. **Semantic Memory:** Long conversations and conceptual ideas are vectorized and saved to Pinecone, allowing the AI to organically recall past discussions.
 3. **Data Privacy:** Every single database table has a strict `user_id` constraint. User A can never accidentally query or view User B's memory, emails, or calendar events.
 

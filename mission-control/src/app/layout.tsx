@@ -4,8 +4,8 @@ import "./globals.css";
 import Sidebar from "../components/Sidebar";
 
 export const metadata: Metadata = {
-  title: "Mission Control — Gravity Claw",
-  description: "Premium AI agent dashboard for Nexus / Gravity Claw",
+  title: "Mission Control — AgenticHQ",
+  description: "Premium AI agent dashboard for Nexus / AgenticHQ",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
