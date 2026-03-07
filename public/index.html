@@ -63,14 +63,53 @@
                 <p style="font-size: 0.75rem; color: var(--text-muted); margin-top:5px;">Multi-Agent Roster</p>
             </div>
             <ul class="agent-list">
-                <li class="agent-item"><span class="agent-icon">🧠</span><div><h4>Manager</h4><p>High-Level Routing</p></div></li>
-                <li class="agent-item"><span class="agent-icon">🎬</span><div><h4>Video Content</h4><p>YouTube & Media</p></div></li>
-                <li class="agent-item"><span class="agent-icon">📧</span><div><h4>Communications</h4><p>Gmail & Calendar</p></div></li>
-                <li class="agent-item"><span class="agent-icon">✍️</span><div><h4>SEO & Blog</h4><p>Analysis & Copy</p></div></li>
-                <li class="agent-item"><span class="agent-icon">💡</span><div><h4>App Factory</h4><p>Reddit Ideation</p></div></li>
-                <li class="agent-item"><span class="agent-icon">🤝</span><div><h4>Lead Gen</h4><p>Outreach & Hunting</p></div></li>
-                <li class="agent-item"><span class="agent-icon">⚙️</span><div><h4>Admin DevOps</h4><p>System Files</p></div></li>
+                <li class="agent-item"><span class="agent-icon">🧠</span>
+                    <div>
+                        <h4>Manager</h4>
+                        <p>High-Level Routing</p>
+                    </div>
+                </li>
+                <li class="agent-item"><span class="agent-icon">🎬</span>
+                    <div>
+                        <h4>Video Content</h4>
+                        <p>YouTube & Media</p>
+                    </div>
+                </li>
+                <li class="agent-item"><span class="agent-icon">📧</span>
+                    <div>
+                        <h4>Communications</h4>
+                        <p>Gmail & Calendar</p>
+                    </div>
+                </li>
+                <li class="agent-item"><span class="agent-icon">✍️</span>
+                    <div>
+                        <h4>SEO & Blog</h4>
+                        <p>Analysis & Copy</p>
+                    </div>
+                </li>
+                <li class="agent-item"><span class="agent-icon">💡</span>
+                    <div>
+                        <h4>App Factory</h4>
+                        <p>Reddit Ideation</p>
+                    </div>
+                </li>
+                <li class="agent-item"><span class="agent-icon">🤝</span>
+                    <div>
+                        <h4>Lead Gen</h4>
+                        <p>Outreach & Hunting</p>
+                    </div>
+                </li>
+                <li class="agent-item"><span class="agent-icon">⚙️</span>
+                    <div>
+                        <h4>Admin DevOps</h4>
+                        <p>System Files</p>
+                    </div>
+                </li>
             </ul>
+            <div style="padding: 15px; border-top: 1px solid var(--border-dim); text-align: center;">
+                <a href="#" id="about-link" style="color: var(--accent); font-size: 0.85rem; text-decoration: none;">ℹ️
+                    About & How to Use</a>
+            </div>
         </div>
 
         <!-- Chat Container -->
@@ -79,33 +118,60 @@
                 <div class="header-content">
                     <h2>Active Session</h2>
                     <button id="logout-btn"
-                        style="background:var(--bg-secondary); color:var(--text-secondary); border:1px solid var(--border-color); padding:4px 8px; border-radius:4px; font-size:12px; cursor:pointer;">Sign Out</button>
+                        style="background:var(--bg-secondary); color:var(--text-secondary); border:1px solid var(--border-color); padding:4px 8px; border-radius:4px; font-size:12px; cursor:pointer;">Sign
+                        Out</button>
                 </div>
             </header>
 
-        <main id="chat-window">
-            <div class="message system-msg">
-                <div class="msg-content">
-                    Identity verified. AgenticHQ router sequence initiated.
+            <main id="chat-window">
+                <div class="message system-msg">
+                    <div class="msg-content">
+                        Identity verified. AgenticHQ router sequence initiated.
+                    </div>
                 </div>
-            </div>
-            <!-- Dynamic messages will be appended here -->
-        </main>
 
-        <div class="input-area">
-            <textarea id="prompt-input" placeholder="Message AgenticHQ..." rows="1"></textarea>
-            <button id="send-btn" title="Send (Enter)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                </svg>
-            </button>
-        </div>
-        <div class="legal-footer">
-            &copy; 2026 AgenticHQ Solutions. All Rights Reserved. Proprietary & Confidential. <a href="#">Terms of
-                Service</a>
-        </div>
+                <div class="message bot-msg" id="splash-message">
+                    <div class="msg-content"
+                        style="background: rgba(99, 102, 241, 0.05); border: 1px solid var(--border-dim); border-left: 4px solid var(--accent); padding: 20px;">
+                        <h3 style="margin-bottom: 10px; color: var(--accent);">Welcome to AgenticHQ 🚀</h3>
+                        <p style="margin-bottom: 15px; font-size: 0.95rem; line-height: 1.5;">
+                            AgenticHQ is a multi-agent system. You are talking to the <strong>Manager</strong>, which
+                            will automatically route your request to the right specialized expert below:
+                        </p>
+                        <ul
+                            style="margin-left: 20px; font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 15px;">
+                            <li><strong>Video Content:</strong> "Create a short video script about the Roman Empire."
+                            </li>
+                            <li><strong>Communications:</strong> "Scan my Gmail for recruiter emails from yesterday."
+                            </li>
+                            <li><strong>SEO & Blog:</strong> "Write a blog post about AI for jcorcione.com and humanize
+                                it."</li>
+                            <li><strong>App Factory:</strong> "Scrape the r/SaaS subreddit and find painful problems to
+                                solve."</li>
+                            <li><strong>Lead Gen:</strong> "Draft a cold outreach email for freelance PM roles."</li>
+                        </ul>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); font-style: italic;">
+                            Just type your request in the box below to get started!
+                        </p>
+                    </div>
+                </div>
+                <!-- Dynamic messages will be appended here -->
+            </main>
+
+            <div class="input-area">
+                <textarea id="prompt-input" placeholder="Message AgenticHQ..." rows="1"></textarea>
+                <button id="send-btn" title="Send (Enter)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+            <div class="legal-footer">
+                &copy; 2026 AgenticHQ Solutions. All Rights Reserved. Proprietary & Confidential. <a href="#">Terms of
+                    Service</a>
+            </div>
         </div> <!-- End chat-main -->
     </div>
 

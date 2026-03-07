@@ -1,0 +1,28 @@
+AGENTICHQ
+QUICK START GUIDE
+
+1. WHAT IS AGENTICHQ?
+AgenticHQ (formerly Gravity Claw) is a specialized team of 7 AI Agents built on top of your local system.
+
+2. THE 7 AGENTS
+- MANAGER: Your main router. Just talk to him, he knows who to call.
+- VIDEO CONTENT: Generates YouTube videos, thumbs, & voiceovers.
+- COMMUNICATIONS: Scans emails and manages Google Calendar.
+- SEO & BLOG: Writes humanized articles for jcorcione.com.
+- APP FACTORY: Scrapes Reddit to find pain points for new SaaS apps.
+- LEAD GEN: Hunts for B2B jobs and freelance PM contracts.
+- ADMIN: DevOps sysadmin who can read files and run CLI scripts.
+
+3. HOW TO USE
+- WEB UI: https://gravity-claw-sigma.vercel.app
+- TELEGRAM: Message your registered bot. (Great for audio/voice commands)
+- TERMINAL: 'npm run start' in your project folder.
+
+4. AUTONOMY RULES
+AgenticHQ runs on a "Figure It Out" protocol. If it hits an error, the Admin agent is authorized to self-heal code and retry before bothering you.
+
+5. NEW FEATURES
+- /humanize: The SEO agent will strip bot-speak ("delve", "testament to") from blogs.
+- /scrape: The App Factory agent will read any subreddit's top complaints for you.
+
+(Welcome to the Multi-Agent Era.)

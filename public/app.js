@@ -275,3 +275,19 @@ promptInput.addEventListener("input", function () {
     this.style.height = "auto";
     this.style.height = (this.scrollHeight) + "px";
 });
+
+// About Link
+const aboutLink = document.getElementById("about-link");
+if (aboutLink) {
+    aboutLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        const splash = document.getElementById("splash-message");
+        if (splash) {
+            splash.style.display = "flex";
+            splash.scrollIntoView({ behavior: "smooth" });
+        } else {
+            // If it was removed, recreate it
+            appendMessage("bot", `### Welcome to AgenticHQ 🚀\nI am your multi-agent routing assistant. You can ask me to do things like:\n* **Video Content:** "Create a short video script about the Roman Empire."\n* **Communications:** "Scan my Gmail for recruiter emails."\n* **SEO & Blog:** "Write a blog post about AI."\n* **App Factory:** "Scrape r/SaaS for app ideas."\n\nJust type what you need below!`, false, false);
+        }
+    });
+}
