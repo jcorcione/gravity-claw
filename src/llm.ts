@@ -113,16 +113,21 @@ User Message: "${userMessage}"`;
 
     try {
         const result = await client.chat.completions.create({
-            model: "stepfun/step-3.5-flash:free", // extremely fast & cheap routing
+            model: "meta-llama/llama-3.3-70b-instruct:free", // highly capable free router
             messages: [{ role: "user", content: routingPrompt }],
             max_tokens: 10,
             temperature: 0.1
         });
 
-        const text = result.choices[0]?.message?.content?.trim().toUpperCase() || "MANAGER";
-        if (["MANAGER", "VIDEO_CONTENT", "COMM", "SEO_BLOG", "APP_FACTORY", "LEAD_GEN", "ADMIN"].includes(text)) {
-            return text as AgentName;
-        }
+        const text = result.choices[0]?.message?.content?.toUpperCase() || "MANAGER";
+        if (text.includes("VIDEO_CONTENT")) return "VIDEO_CONTENT";
+        if (text.includes("COMM")) return "COMM";
+        if (text.includes("SEO_BLOG")) return "SEO_BLOG";
+        if (text.includes("APP_FACTORY")) return "APP_FACTORY";
+        if (text.includes("LEAD_GEN")) return "LEAD_GEN";
+        if (text.includes("ADMIN")) return "ADMIN";
+
+        return "MANAGER";
     } catch (e) {
         console.error("Router error, falling back to MANAGER", e);
     }
