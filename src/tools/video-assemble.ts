@@ -4,16 +4,7 @@ import * as path from "path";
 import * as os from "os";
 import type { Tool } from "./index.js";
 
-// Download a URL to a temp file, return local path
-async function downloadToTemp(url: string, ext: string): Promise<string> {
-    const tmpPath = path.join(os.tmpdir(), `gc_asset_${Date.now()}.${ext}`);
-    const res = await fetch(url, { signal: AbortSignal.timeout(60_000) });
-    if (!res.ok) throw new Error(`Failed to download asset from URL: HTTP ${res.status} — ${url}`);
-    const buffer = await res.arrayBuffer();
-    fs.writeFileSync(tmpPath, Buffer.from(buffer));
-    console.log(`  ⬇️ Downloaded asset to temp: ${tmpPath}`);
-    return tmpPath;
-}
+// (The Flask compiler now handles downloading URLs directly)
 
 const COMFYUI_OUTPUT = "C:/Users/jcorc/comfyui-output";
 
@@ -57,6 +48,10 @@ YouTube Shorts spec: 1080×1920 (9:16 vertical), H.264, AAC 192kbps, up to 60 se
                 enum: ["static", "zoom_in", "zoom_out", "fade"],
                 description: "Visual effect for the image (default: static). 'zoom_in'/'zoom_out' add a slow Ken Burns zoom effect.",
             },
+            dynamic_subtitles: {
+                type: "boolean",
+                description: "Enable dynamic word-by-word subtitles via Groq Whisper API (default: false)"
+            }
         },
         required: ["imagePath", "audioPath"],
     },
@@ -66,29 +61,24 @@ YouTube Shorts spec: 1080×1920 (9:16 vertical), H.264, AAC 192kbps, up to 60 se
             return "Error: COMPILER_URL is not set. The Flask compiler must be running on the desktop.";
         }
 
+        // URLs are passed directly to the Flask compiler to handle downloading,
+        // but if Jarvis hallucinates raw filenames, we need to convert them to local absolute paths!
         let imagePath = input.imagePath as string;
         let audioPath = input.audioPath as string;
-        const outputName = (input.outputName as string | undefined)
-            ?? `short_${Date.now()}.mp4`;
+
+        if (!imagePath.startsWith("http") && !imagePath.includes("/") && !imagePath.includes("\\")) {
+            imagePath = `${COMFYUI_OUTPUT}/${imagePath}`;
+        }
+        if (!audioPath.startsWith("http") && !audioPath.includes("/") && !audioPath.includes("\\")) {
+            audioPath = `${COMFYUI_OUTPUT}/${audioPath}`;
+        }
+
+        const outputName = (input.outputName as string | undefined) ?? `short_${Date.now()}.mp4`;
         const subtitle = input.subtitle as string | undefined;
         const effect = (input.effect as string | undefined) ?? "static";
-
-        // Auto-download if URLs provided instead of local paths
-        const tempFiles: string[] = [];
-        try {
-            if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
-                console.log(`  🌐 Image is a URL — downloading to temp file...`);
-                imagePath = await downloadToTemp(imagePath, "png");
-                tempFiles.push(imagePath);
-            }
-            if (audioPath.startsWith("http://") || audioPath.startsWith("https://")) {
-                console.log(`  🌐 Audio is a URL — downloading to temp file...`);
-                audioPath = await downloadToTemp(audioPath, "mp3");
-                tempFiles.push(audioPath);
-            }
-        } catch (err: any) {
-            return `Error downloading asset: ${err.message}`;
-        }
+        const dynamicSubtitles = (input.dynamic_subtitles as boolean | undefined) ?? false;
+        const groqApiKey = process.env["GROQ_API_KEY"];
+        const bgMusicDir = "C:/Users/jcorc/n8n/assets/music/worship";
 
         // Health check
         try {
@@ -101,11 +91,22 @@ YouTube Shorts spec: 1080×1920 (9:16 vertical), H.264, AAC 192kbps, up to 60 se
         console.log(`  🎬 Assembling Short: ${imagePath} + ${audioPath} → ${outputName}`);
 
         try {
+            const payload = {
+                image_path: imagePath,
+                audio_path: audioPath,
+                output_name: outputName,
+                subtitle,
+                effect,
+                dynamic_subtitles: dynamicSubtitles,
+                groq_api_key: groqApiKey,
+                bg_music_dir: bgMusicDir
+            };
+
             const res = await fetch(`${compilerUrl}/assemble`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ image_path: imagePath, audio_path: audioPath, output_name: outputName, subtitle, effect }),
-                signal: AbortSignal.timeout(120_000), // 2 min
+                body: JSON.stringify(payload),
+                signal: AbortSignal.timeout(300_000), // 5 min
             });
 
             const data = await res.json() as any;

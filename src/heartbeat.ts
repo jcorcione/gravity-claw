@@ -64,7 +64,7 @@ async function sendProactiveMessage(prompt: string, label: string): Promise<void
     console.log(`\n⏰ Heartbeat: ${label}`);
 
     try {
-        const response = await runAgentLoop(prompt);
+        const response = await runAgentLoop(prompt, "default_user", true);
 
         // Send to all allowed users
         for (const userId of config.allowedUserIds) {
@@ -87,7 +87,7 @@ async function sendProactiveMessage(prompt: string, label: string): Promise<void
 // ─── Trigger Briefing Manually ───────────────────────────
 
 export async function triggerBriefing(): Promise<string> {
-    return runAgentLoop(BRIEFING_PROMPT);
+    return runAgentLoop(BRIEFING_PROMPT, "default_user", true);
 }
 
 // ─── Schedule Management ─────────────────────────────────

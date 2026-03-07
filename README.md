@@ -32,16 +32,23 @@ The Admin Dashboard is a specialized "Command Center" designed exclusively for t
 
 ---
 
-## 3. Telegram Channel (For On-The-Go & Voice Notes)
-Because Nexus AI is integrated with Groq Whisper, it can handle robust voice transcriptions. Telegram is the best way to interact with the bot when you are away from your desk.
+## 3. Telegram (For On-The-Go & Voice Notes)
+Because Nexus AI is integrated with Groq Whisper, it can handle robust voice transcriptions. Telegram is the best way to interact on mobile.
 
-* **How it works:** Simply text or send a voice note to the `@FreshClawdBot` on Telegram.
-* **Proactive Alerts:** Telegram is the exclusive channel where Nexus AI will push proactive alerts (such as the 8:00 AM Morning Briefing or mid-day email recommendations).
-* **Security:** The Telegram bot runs strictly in "Admin Only" mode. It will ignore and reject messages from any Telegram ID not explicitly whitelisted in the `.env` file.
+* **Active Bot:** `@JCAntiGravBot` ← use this (Railway backend)
+* **Legacy Bot:** `@JohsClawBot` (old EC2 instance — retiring soon, do not use)
+* **Proactive Alerts:** Telegram receives the 8:00 AM Morning Briefing and mid-day Smart Recommendations.
+* **Security:** Admin-only mode — ignores any Telegram ID not in the `ALLOWED_USER_IDS` whitelist.
 
 ---
 
-## 4. Terminal UI (For Developers)
+## 4. Discord Bot
+* **Invite:** [Add to Server](https://discord.com/oauth2/authorize?client_id=1477087703165046785)
+* Use when you're already in Discord and want Jarvis without switching apps.
+
+---
+
+## 5. Terminal UI (For Developers)
 If you are actively coding or managing the server infrastructure, you can talk to Nexus AI without leaving your command line.
 
 * **How to run:**
@@ -58,4 +65,14 @@ If you are actively coding or managing the server infrastructure, you can talk t
 2. **Semantic Memory:** Long conversations and conceptual ideas are vectorized and saved to Pinecone, allowing the AI to organically recall past discussions.
 3. **Data Privacy:** Every single database table has a strict `user_id` constraint. User A can never accidentally query or view User B's memory, emails, or calendar events.
 
-> *System Configuration locked until Monday, February 23rd, 2026 @ 8:30 AM.*
+---
+
+### Desktop Services (Required for Video Pipeline)
+These must be running on your desktop PC for video creation to work:
+
+| Service | Command | Tailscale Path |
+|---|---|---|
+| Flask FFmpeg Compiler | `cd C:\Users\jcorc\video_compilation && python grace_note_compiler_fixed.py` | `/compiler` |
+| ComfyUI (Thumbnails) | Run `nvidia_gpu.bat` | `/comfy` |
+
+Tailscale Funnel is path-routed on `https://desktop-4ekcfdi.tail787c77.ts.net` — both services coexist on the same public URL.

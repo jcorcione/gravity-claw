@@ -8,8 +8,10 @@ import { saveMessage } from "./memory-pg.js";
 
 // ─── Agent Loop ──────────────────────────────────────────
 
-export async function runAgentLoop(userMessage: string, userId: string = "default_user"): Promise<string> {
-    await saveMessage("user", userMessage, userId);
+export async function runAgentLoop(userMessage: string, userId: string = "default_user", skipMemory: boolean = false): Promise<string> {
+    if (!skipMemory) {
+        await saveMessage("user", userMessage, userId);
+    }
 
     const messages: ChatMessage[] = [
         { role: "user", content: userMessage },
@@ -36,12 +38,16 @@ export async function runAgentLoop(userMessage: string, userId: string = "defaul
 
             if (!message.tool_calls || message.tool_calls.length === 0) {
                 const text = message.content ?? "(No response)";
-                await saveMessage("assistant", text, userId);
+                if (!skipMemory) {
+                    await saveMessage("assistant", text, userId);
+                }
                 return text;
             }
 
             // Append the assistant's response (with tool_calls) to the conversation
-            await saveMessage("assistant", message.content || "(Tool Call)", userId);
+            if (!skipMemory) {
+                await saveMessage("assistant", message.content || "(Tool Call)", userId);
+            }
             messages.push({
                 role: "assistant",
                 content: message.content,
@@ -73,7 +79,9 @@ export async function runAgentLoop(userMessage: string, userId: string = "defaul
                     console.log(`  ✅ Tool result: ${result.substring(0, 100)}...`);
 
                     // Append tool result as a tool message (OpenAI format)
-                    await saveMessage("tool", `[${toolName}] ${result}`, userId);
+                    if (!skipMemory) {
+                        await saveMessage("tool", `[${toolName}] ${result}`, userId);
+                    }
                     messages.push({
                         role: "tool",
                         tool_call_id: call.id,

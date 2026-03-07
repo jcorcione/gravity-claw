@@ -28,16 +28,16 @@ export const scanRecruiterEmailsTool: Tool = {
         }
     },
     execute: async (input, context) => {
-        if (!process.env.GMAIL_CREDENTIALS_JSON || !process.env.GMAIL_TOKEN_JSON) {
-            return "Error: Missing GMAIL_CREDENTIALS_JSON or GMAIL_TOKEN_JSON for Gmail fallback.";
+        const clientId = process.env.GOOGLE_CLIENT_ID;
+        const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+        const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+
+        if (!clientId || !clientSecret || !refreshToken) {
+            return "Error: Missing GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, or GOOGLE_REFRESH_TOKEN.";
         }
 
-        const credentials = JSON.parse(process.env.GMAIL_CREDENTIALS_JSON);
-        const token = JSON.parse(process.env.GMAIL_TOKEN_JSON);
-
-        const { client_secret, client_id, redirect_uris } = credentials.installed || credentials.web;
-        const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
-        oAuth2Client.setCredentials(token);
+        const oAuth2Client = new google.auth.OAuth2(clientId, clientSecret);
+        oAuth2Client.setCredentials({ refresh_token: refreshToken });
 
         const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
 

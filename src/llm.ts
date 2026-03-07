@@ -3,6 +3,8 @@ import { config } from "./config.js";
 import { getActiveModel } from "./models.js";
 import { getAllFacts, getTranscript } from "./memory-pg.js";
 import type { Tool } from "./tools/index.js";
+import fs from "fs/promises";
+import path from "path";
 
 // ─── Types ───────────────────────────────────────────────
 
@@ -51,8 +53,8 @@ RESPONSE FORMAT RULES (CRITICAL):
 - NEVER include raw tool call details like "[tool] [tool_name] {...}" in your final response.
 - NEVER show JSON payloads or tool arguments in your reply to the user.
 - After using tools, give ONLY a clean, human-readable summary of what was accomplished.
-- Good: "✅ Script saved to Baserow row 232. Status set to script_ready."
-- Bad: "[tool] [baserow_content] {"action":"update","row_id":232...}"
+- Good: "✅ Script saved to Supabase row 232. Status set to script_ready."
+- Bad: "[tool] [supabase_content] {"action":"update","row_id":232...}"
 
 ───────────────────────────────────────
 YOUTUBE CHANNELS (John owns both):
@@ -64,7 +66,7 @@ YOUTUBE CHANNELS (John owns both):
    - Voice: Erika New Worship Voice (ElevenLabs ID: wIQlXk1pwcszdjmUYKyP)
    - Script formula: Pain Point HOOK → Prayer/Bible Verse BODY → Strong CTA
    - Thumbnail style: Dark moody background, warm golden light, cross motifs, no faces
-   - Baserow channel value: "gracenote"
+   - Channel parameter: "gracenote"
 
 2. THE GIGAWERX CHANNEL (@gigawerx)
    - Channel ID: UC2INQGyEm01fNY3CUoJAGIg
@@ -73,27 +75,27 @@ YOUTUBE CHANNELS (John owns both):
    - Voice: John's Voice Pro (ElevenLabs ID: 2EsgRiyQL1INfP0QD8HP)
    - Script formula: Strong HOOK (stat/claim) → Problem/Solution LIST → Strong CTA
    - Thumbnail style: Dark background, neon cyan accents, bold text overlays, no faces
-   - Baserow channel value: "gigawerx"
+   - Channel parameter: "gigawerx"
 
 ───────────────────────────────────────────────────────────────────────────
 CONTENT CREATION TOOLS (Use individually on request):
 ───────────────────────────────────────
 John owns two YouTube channels:
-1. GRACE NOTE INSPIRATIONS (@gracenoteinspirations) - Christian faith, prayer, Bible verses. Shorts. Voice: Erika (wIQlXk1pwcszdjmUYKyP). Baserow channel="gracenote"
-2. THE GIGAWERX CHANNEL (@gigawerx) - AI tools, gig economy, freelancing. Shorts. Voice: John Pro (2EsgRiyQL1INfP0QD8HP). Baserow channel="gigawerx"
+1. GRACE NOTE INSPIRATIONS (@gracenoteinspirations) - Christian faith, prayer, Bible verses. Shorts. Voice: Erika (wIQlXk1pwcszdjmUYKyP). Supabase channel="gracenote"
+2. THE GIGAWERX CHANNEL (@gigawerx) - AI tools, gig economy, freelancing. Shorts. Voice: John Pro (2EsgRiyQL1INfP0QD8HP). Supabase channel="gigawerx"
 
-Available tools - call INDIVIDUALLY on request only, do NOT auto-chain into a pipeline:
-- baserow_content: Manage content rows in Baserow table 642827
+Available tools - use as requested:
+- create_short_video: The MACRO tool. ALWAYS use this to create a video when asked. It handles script, image, voice, and assembly in ONE step.
+- supabase_content: Do NOT use this for video generation anymore. Only use if John explicitly asks to query the database.
 - youtube_script_generator: Write channel scripts
 - youtube_analytics: Pull live stats
 - comfyui_generate: Thumbnails (needs desktop + ComfyUI on)
-- elevenlabs_audio mode=voiceover: Narration audio
+- elevenlabs_audio: Narration audio or music
 - video_assemble: Combine image + audio into MP4 (needs Flask compiler on desktop)
 - r2_upload: Upload to Cloudflare R2
 - youtube_upload: Upload MP4 to YouTube
 
-Baserow status values: new -> script_ready -> fact_ok -> seo_ready -> rendering -> rendered -> error
-CRITICAL: After baserow_content create, extract the returned rowId for ALL subsequent updates.
+CRITICAL: When asked to "create a video", use the \`create_short_video\` tool. Do NOT try to manually chain supabase, script gen, comfyui, etc.
 
 ───
 MEMORY INSTRUCTIONS:
@@ -108,6 +110,16 @@ async function buildSystemPrompt(): Promise<string> {
     const transcript = await getTranscript(20);
 
     let prompt = BASE_SYSTEM_PROMPT;
+
+    try {
+        const statePath = path.join(process.cwd(), "system_state.md");
+        const stateContent = await fs.readFile(statePath, "utf-8");
+        if (stateContent.trim()) {
+            prompt += `\n\n───────────────────────────────────────\nACTIVE SYSTEM STATE (Highest Priority Context):\n───────────────────────────────────────\n${stateContent}`;
+        }
+    } catch {
+        // Silently skip if system_state.md does not exist
+    }
 
     if (facts.length > 0) {
         const factLines = facts.map((f) => `- [${f.entity}] ${f.attribute}: ${f.value}`).join("\n");

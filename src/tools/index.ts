@@ -69,13 +69,14 @@ import { youtubeAnalyticsTool } from "./youtube-analytics.js";
 import { youtubeScriptGeneratorTool } from "./youtube-script-generator.js";
 import { comfyuiGenerateTool } from "./comfyui-generate.js";
 import { elevenlabsAudioTool } from "./elevenlabs-audio.js";
-import { baserowContentTool } from "./baserow-content.js";
+import { supabaseContentTool } from "./supabase-content.js";
 import { browserAgentTool } from "./browser-agent.js";
 import { videoCompileTool } from "./video-compile.js";
 import { edgeTtsTool } from "./edge-tts.js";
 import { r2UploadTool } from "./r2-upload.js";
 import { youtubeUploadTool } from "./youtube-upload.js";
 import { videoAssembleTool } from "./video-assemble.js";
+import { createShortVideoTool } from "./create-short-video.js";
 
 // Prevent multiple registrations if file is re-imported
 if (registry.size === 0) {
@@ -98,11 +99,12 @@ if (registry.size === 0) {
     registerTool(youtubeScriptGeneratorTool);
     registerTool(comfyuiGenerateTool);
     registerTool(elevenlabsAudioTool);
-    registerTool(baserowContentTool);
+    registerTool(supabaseContentTool);
     registerTool(browserAgentTool);
     registerTool(videoCompileTool);
     registerTool(edgeTtsTool);
     registerTool(r2UploadTool);
     registerTool(youtubeUploadTool);
     registerTool(videoAssembleTool);
+    registerTool(createShortVideoTool);
 }

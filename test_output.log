@@ -1,0 +1,39 @@
+≡ƒÜÇ Starting Pipeline Test...
+[Macro] Starting end-to-end pipeline for gracenote - "Friday Rest..."
+[Macro - Step 1/4] Skipping Generation. Using provided script and image prompt.
+[Macro - Step 2/4] Generating Thumbnail via ComfyUI...
+[Tool: comfyui_generate] Generating shorts_vertical for gracenote: a tired person's coffee mug on a desk in a dark room warm li...
+[comfyui_generate] Job submitted: 2c2b618f-a370-40ef-80ce-42b3a4553aee. Waiting for RTX 3060 Ti...
+[Tool: elevenlabs_audio] Mode: voiceover, Channel: gracenote
+(node:128432) [node-fetch#buffer] DeprecationWarning: Please use 'response.arrayBuffer()' instead of 'response.buffer()'
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[Macro - Step 3.5/4] Uploading audio to R2 for compiler access...
+  Γÿü∩╕Å R2 Upload: temp-voiceovers/gravity-claw-voiceover-1772752353596.mp3 (0.31 MB) ΓåÆ gni-media
+[Macro] Audio uploaded to R2: https://pub-b96f3866adb34da5b4275c6109e452e0.r2.dev/temp-voiceovers/gravity-claw-voiceover-1772752353596.mp3
+[Macro - Step 4/4] Assembling final video...
+  ≡ƒÄ¼ Assembling Short: http://127.0.0.1:8188/view?filename=gravity-claw-thumb_00009_.png&subfolder=&type=output + https://pub-b96f3866adb34da5b4275c6109e452e0.r2.dev/temp-voiceovers/gravity-claw-voiceover-1772752353596.mp3 ΓåÆ gracenote_short_1772752357222.mp4
+[Macro - Step 5/5] Logging video to Supabase...
+[Macro] Supabase Log Result: {
+  "success": true,
+  "message": "New video recorded in Supabase!",
+  "row": {
+    "id": "2dd231ab-3865-4825-a0f1-ac1ad90d475d",
+    "topic": "Friday Rest",
+    "channel": "gracenote"
+  }
+}
+Γ£à Pipeline Result:
+Γ£à MACRO PIPELINE COMPLETE!
+        
+Script Output: 
+Another Friday. Empty. Drained. God sees your exhaustion. He didn't design you for endless doing. He made you for rest. Isaiah 58 promises: when you make rest sacred, joy returns. Your rest matters to God.
+
+Assembly Result:
+Γ£à Short assembled!
+≡ƒôü Output: C:/Users/jcorc/comfyui-output/gracenote_short_1772752357222.mp4
+ΓÅ▒∩╕Å Duration: 22.6s
+≡ƒôÉ Format: 1080├ù1920 (9:16 Shorts)
+
+Next steps:
+1. r2_upload(filePath="C:/Users/jcorc/comfyui-output/gracenote_short_1772752357222.mp4") ΓåÆ get public URL
+2. youtube_upload(videoUrl="[R2 URL]", title="...", channel="grace_note")
