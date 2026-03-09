@@ -52,11 +52,17 @@ async function buildSystemPrompt(agent: AgentName): Promise<string> {
 
     let prompt = getAgentPromptString(agent);
 
+    // Provide the agents with absolute temporal awareness
+    const now = new Date();
+    const currentDateString = now.toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/New_York' });
+    const currentTimeString = now.toLocaleTimeString("en-US", { timeZone: 'America/New_York' });
+    prompt += `\n\n[SYSTEM CONTEXT]\nCurrent Date: ${currentDateString}\nCurrent Time (EST/EDT): ${currentTimeString}\n`;
+
     try {
         const statePath = path.join(process.cwd(), "system_state.md");
         const stateContent = await fs.readFile(statePath, "utf-8");
         if (stateContent.trim()) {
-            prompt += `\n\n───────────────────────────────────────\nACTIVE SYSTEM STATE (Highest Priority Context):\n───────────────────────────────────────\n${stateContent}`;
+            prompt += `\n───────────────────────────────────────\nACTIVE SYSTEM STATE (Highest Priority Context):\n───────────────────────────────────────\n${stateContent}`;
         }
     } catch {
         // Silently skip if system_state.md does not exist
@@ -114,6 +120,8 @@ Respond with EXACTLY one of these words in raw text (no reasoning, no markdown):
 - APP_FACTORY (Brainstorming apps, scraping reddit for pain points)
 - LEAD_GEN (Hunting for B2B leads or freelance PM roles)
 - ADMIN (Running shell scripts, reading local files)
+
+Current Date: ${new Date().toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/New_York' })}
 
 User Message: "${userMessage}"`;
 
