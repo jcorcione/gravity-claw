@@ -109,7 +109,7 @@ export async function routeUserIntent(userMessage: string): Promise<AgentName> {
 Respond with EXACTLY one of these words in raw text (no reasoning, no markdown):
 - MANAGER (Basic greeting, simple memory fact updates)
 - VIDEO_CONTENT (YouTube, video generation, elevenlabs, thumbnails, scripts)
-- COMM (Scanning emails, drafting recruiter emails, managing google calendar)
+- COMM (Scanning emails, drafting recruiter emails, managing google calendar, executing the daily morning intelligence briefing)
 - SEO_BLOG (Writing blog posts, SEO analysis, browsing the web for research)
 - APP_FACTORY (Brainstorming apps, scraping reddit for pain points)
 - LEAD_GEN (Hunting for B2B leads or freelance PM roles)

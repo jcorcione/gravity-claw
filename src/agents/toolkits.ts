@@ -39,8 +39,9 @@ export function getAgentTools(agent: AgentName): Tool[] {
 
         case "COMM":
             return [
-                ...getToolsByName(["scan_recruiter_emails", "search_calendar", "manage_calendar"]),
-                ...getMcpToolsByPrefix("mcp_gmail_")
+                ...getToolsByName(["scan_recruiter_emails", "search_calendar", "manage_calendar", "search_web"]),
+                ...getMcpToolsByPrefix("mcp_gmail_"),
+                ...getMcpToolsByPrefix("mcp_tavily_")
             ];
 
         case "SEO_BLOG":
