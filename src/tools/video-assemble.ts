@@ -6,7 +6,7 @@ import type { Tool } from "./index.js";
 
 // (The Flask compiler now handles downloading URLs directly)
 
-const COMFYUI_OUTPUT = "C:/Users/jcorc/comfyui-output";
+const COMFYUI_OUTPUT = "C:/ComfyUI/ComfyUI_windows_portable/ComfyUI/output";
 
 export const videoAssembleTool: Tool = {
     name: "video_assemble",
@@ -61,15 +61,23 @@ YouTube Shorts spec: 1080×1920 (9:16 vertical), H.264, AAC 192kbps, up to 60 se
             return "Error: COMPILER_URL is not set. The Flask compiler must be running on the desktop.";
         }
 
-        // URLs are passed directly to the Flask compiler to handle downloading,
-        // but if Jarvis hallucinates raw filenames, we need to convert them to local absolute paths!
         let imagePath = input.imagePath as string;
         let audioPath = input.audioPath as string;
+
+        // Extract filename from ComfyUI tailscale URL if it is one, to avoid local loopback network errors
+        if (imagePath.includes("view?filename=")) {
+            const urlObj = new URL(imagePath);
+            const filename = urlObj.searchParams.get("filename");
+            if (filename) {
+                imagePath = filename;
+            }
+        }
 
         if (!imagePath.startsWith("http") && !imagePath.includes("/") && !imagePath.includes("\\")) {
             imagePath = `${COMFYUI_OUTPUT}/${imagePath}`;
         }
         if (!audioPath.startsWith("http") && !audioPath.includes("/") && !audioPath.includes("\\")) {
+            // Audio paths from elevenlabs_audio might already be absolute. If not, default to COMFYUI_OUTPUT
             audioPath = `${COMFYUI_OUTPUT}/${audioPath}`;
         }
 
@@ -112,6 +120,14 @@ YouTube Shorts spec: 1080×1920 (9:16 vertical), H.264, AAC 192kbps, up to 60 se
             const data = await res.json() as any;
 
             if (data.status === "success") {
+                // Best practice: clean up raw source assets now that they are safely baked into the final MP4
+                try {
+                    if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
+                    if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
+                } catch (e: any) {
+                    console.log(`[video_assemble] Warning: Could not delete source assets: ${e.message}`);
+                }
+
                 return `✅ Short assembled!\n📁 Output: ${data.output_file}\n⏱️ Duration: ${data.duration_seconds?.toFixed(1) ?? "unknown"}s\n📐 Format: 1080×1920 (9:16 Shorts)\n\nNext steps:\n1. r2_upload(filePath="${data.output_file}") → get public URL\n2. youtube_upload(videoUrl="[R2 URL]", title="...", channel="grace_note")`;
             } else {
                 return `❌ Assembly failed: ${data.message ?? data.error ?? JSON.stringify(data)}`;
