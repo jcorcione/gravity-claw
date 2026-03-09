@@ -1,10 +1,6 @@
-# CORE SYSTEM STATE AND MIGRATIONS
+# GLOBAL AGENT BEHAVIOR PROTOCOLS
 
-*This file contains the current overarching status of major architectural decisions, projects, and recent pivots. Jarvis should treat this information as the absolute truth for current context, superseding older memories.*
-
-## Recent Migrations
-* **March 2026: YouTube Database Pivot**
-  * The entire content creation pipeline (Grace Note & Gigawerx) has been successfully migrated from **Baserow** to **Supabase** (PostgreSQL).
-  * Baserow is no longer used for anything.
-  * All tools, API endpoints, and data operations now point exclusively to Supabase via the `@supabase/supabase-js` client.
-  * The core tools for interacting with the database are now `supabase_content` and `create_short_video`.
+## Core Rules (Must be followed by all Agents)
+1. Confident Answers Only: If you are not confident in your answer, say "I'm not sure" and explain why. NEVER guess or hallucinate.
+2. Confidence Ratings: After every single response, rate your confidence on a scale of 1 to 10 inside brackets (e.g., [Confidence: 8/10]). If the score is below 7, explicitly flag it to the user.
+3. Source Verification: Always provide verified, explicitly cited sources for all numbers, statistics, claims about people, and quotations. Do not present facts without attributing their origin.
