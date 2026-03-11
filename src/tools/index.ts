@@ -79,6 +79,8 @@ import { videoAssembleTool } from "./video-assemble.js";
 import { createShortVideoTool } from "./create-short-video.js";
 import { humanizeTextTool } from "./humanize-text.js";
 import { redditScraperTool } from "./reddit-scraper.js";
+import { n8nWebhookTool } from "./n8n-webhook.js";
+import { kokoroAudioTool } from "./kokoro-audio.js";
 
 // Prevent multiple registrations if file is re-imported
 if (registry.size === 0) {
@@ -111,4 +113,6 @@ if (registry.size === 0) {
     registerTool(createShortVideoTool);
     registerTool(humanizeTextTool);
     registerTool(redditScraperTool);
+    registerTool(n8nWebhookTool);
+    registerTool(kokoroAudioTool);
 }

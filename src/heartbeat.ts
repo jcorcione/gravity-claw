@@ -24,9 +24,10 @@ const BRIEFING_PROMPT = `You are running John Corcione's morning intelligence br
 STEP 1 — RECRUITER EMAIL SCAN:
 Run scan_recruiter_emails (max 10). Report: how many emails, any recruiter contacts, any cover letters drafted.
 
-STEP 2 — SITE SCAN (use Tavily MCP search tool):
+STEP 2 — SITE & NEWSLETTER SCAN:
 a) Search/scrape https://jcorcione.com — find the latest articles or posts on the site. Report 1-2 recent content items.
-b) Search/scrape https://wired.com for the latest AI news headlines published today. Report top 3 headlines.
+b) Search the Gmail inbox for emails from Kim Komando (sender domain: komando.com) received in the last 24 hours. Extract and report the top 2-3 tech tips or headlines from the email body.
+c) Search the Gmail inbox for emails from Tech Brew (sender domain: techbrew.com OR morning brew) received in the last 24 hours. Extract and report the top 2-3 tech news headlines from the email body.
 
 STEP 3 — GOOGLE TRENDS FOR GIGAWERX (use Tavily MCP search tool):
 Search: "Google Trends AI tools freelancing gig economy trending topics today 2026"
@@ -47,7 +48,8 @@ Format the briefing as:
 
 📧 *Email:* [summary or "Inbox clear"]
 🌐 *JCorcione.com:* [latest post or content]
-📰 *Wired AI News:* [top 2 headlines]
+📰 *Kim Komando:* [top 2 tips/headlines from today's email]
+📱 *Tech Brew:* [top 2 headlines from today's email]
 ⚡ *Gigawerx Trends:* [top 2-3 hot topics]
 🙏 *Grace Note Trends:* [top 2 faith topics]
 📅 *Today:* [events or "Nothing scheduled"]
