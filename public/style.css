@@ -453,3 +453,66 @@ header h2 {
 .legal-footer a:hover {
     text-decoration: underline;
 }
+
+/* ─── Mobile Responsiveness ──────────────────────────────── */
+@media (max-width: 768px) {
+    #auth-gate .auth-box {
+        padding: 30px 20px;
+    }
+
+    #chat-app {
+        flex-direction: column;
+        border-radius: 0;
+        border: none;
+        height: 100vh;
+        max-height: 100vh;
+    }
+
+    .sidebar {
+        display: none; /* Hide agent roster on mobile to maximize chat space */
+    }
+
+    .chat-main {
+        height: 100vh;
+        width: 100%;
+    }
+
+    header {
+        padding: 15px;
+        border-radius: 0;
+    }
+    
+    header h2 {
+        font-size: 1.1rem;
+    }
+
+    #chat-window {
+        padding: 15px;
+        gap: 15px;
+    }
+
+    .message {
+        max-width: 95%; /* Increase width for small screens */
+    }
+
+    .msg-content {
+        padding: 10px 14px;
+        font-size: 0.9rem;
+    }
+
+    .input-area {
+        padding: 15px;
+        gap: 10px;
+    }
+
+    #prompt-input {
+        padding: 12px;
+        font-size: 0.95rem;
+    }
+    
+    #send-btn {
+        width: 45px;
+        height: 45px;
+        flex-shrink: 0;
+    }
+}

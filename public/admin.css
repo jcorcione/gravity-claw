@@ -373,3 +373,68 @@ body {
         transform: rotate(360deg);
     }
 }
+
+/* ─── Mobile Responsiveness ──────────────────────────────── */
+@media (max-width: 768px) {
+    .admin-layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding-right: 15px;
+    }
+
+    .sidebar-header {
+        border-bottom: none;
+        height: 60px;
+        padding: 0 15px;
+    }
+    
+    .sidebar-nav {
+        display: none; /* Hide side nav vertical items on mobile (primarily one view anyway) */
+    }
+    
+    .sidebar-footer {
+        padding: 10px;
+        border-top: none;
+        max-width: 140px;
+    }
+    
+    .logout-btn {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+
+    .main-content {
+        padding: 20px;
+        height: calc(100vh - 60px);
+    }
+
+    .content-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+        margin-bottom: 24px;
+    }
+    
+    .content-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .auth-box {
+        padding: 30px 20px;
+        border-radius: 12px;
+    }
+}
