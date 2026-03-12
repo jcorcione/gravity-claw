@@ -96,6 +96,11 @@ export const scanRecruiterEmailsTool: Tool = {
                     body = Buffer.from(messageData.data.payload.body.data, 'base64').toString('utf8');
                 }
 
+                // TRUNCATION OPTIMIZATION: Prevent massive tracking-pixel strings or massive email threads from devouring agent LLM context
+                if (body.length > 2500) {
+                    body = body.substring(0, 2500) + "\n...[TRUNCATED TO SAVE AI TOKEN COSTS]...";
+                }
+
                 const email: EmailSummary = {
                     id: emailId,
                     threadId: messageData.data.threadId || emailId,

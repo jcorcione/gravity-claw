@@ -47,7 +47,7 @@ async function buildSystemPrompt(agent: AgentName): Promise<string> {
     const facts = await getAllFacts();
 
     // We fetch fewer transcript messages for sub-agents to avoid context poisoning
-    const transcriptLimit = agent === "MANAGER" ? 20 : 10;
+    const transcriptLimit = agent === "MANAGER" ? 10 : 5;
     const transcript = await getTranscript(transcriptLimit);
 
     let prompt = getAgentPromptString(agent);
@@ -111,6 +111,16 @@ const ROUTER_MODEL_ROTATION = [
 // ─── Router Logic ─────────────────────────────────────────
 
 export async function routeUserIntent(userMessage: string): Promise<AgentName> {
+    // ─── Fast Regex Slash Command Bypass ─────────────────────
+    const lowerMessage = userMessage.trim().toLowerCase();
+    if (lowerMessage.startsWith("/video")) return "VIDEO_CONTENT";
+    if (lowerMessage.startsWith("/comm")) return "COMM";
+    if (lowerMessage.startsWith("/seo")) return "SEO_BLOG";
+    if (lowerMessage.startsWith("/app")) return "APP_FACTORY";
+    if (lowerMessage.startsWith("/lead")) return "LEAD_GEN";
+    if (lowerMessage.startsWith("/admin")) return "ADMIN";
+    if (lowerMessage.startsWith("/manager")) return "MANAGER";
+
     const routingPrompt = `Analyze the user's message and pick ONE domain expert to handle it.
 Respond with EXACTLY one of these words in raw text (no reasoning, no markdown):
 - MANAGER (Basic greeting, simple memory fact updates)
