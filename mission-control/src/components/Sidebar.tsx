@@ -24,7 +24,7 @@ export default function Sidebar() {
     const path = usePathname();
 
     return (
-        <aside style={{
+        <aside className="app-sidebar" style={{
             width: "var(--sidebar-width)",
             minHeight: "100vh",
             background: "var(--bg-deepest)",
@@ -39,7 +39,7 @@ export default function Sidebar() {
         }}>
 
             {/* ── Brand ─────────────────────────────────── */}
-            <div style={{ padding: "24px 20px 20px", borderBottom: "1px solid var(--border)" }}>
+            <div className="sidebar-header" style={{ padding: "24px 20px 20px", borderBottom: "1px solid var(--border)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
                     <div style={{
                         width: 36, height: 36,
@@ -120,14 +120,15 @@ export default function Sidebar() {
                                 style={{ color: active ? "var(--orange)" : "inherit", flexShrink: 0 }}
                                 strokeWidth={active ? 2.5 : 2}
                             />
-                            {label}
+                            {/* We wrap the label in a span to optionally hide it or shift it on mobile if needed, though mobile CSS handles flex-direction column */}
+                            <span>{label}</span>
                         </Link>
                     );
                 })}
             </nav>
 
             {/* ── XP Bar ────────────────────────────────── */}
-            <div style={{
+            <div className="sidebar-footer" style={{
                 padding: "16px 20px 20px",
                 borderTop: "1px solid var(--border)",
             }}>

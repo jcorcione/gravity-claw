@@ -91,21 +91,21 @@ Always be concise, helpful, and action-oriented. When uncertain, use your tools 
             {/* Config entries */}
             <div className="section-divider fade-in">Environment Variables</div>
 
-            <div className="card fade-in fade-in-3">
-                <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-                    {configs.map((cfg, i) => (
-                        <div key={cfg.key} style={{
-                            display: "grid",
-                            gridTemplateColumns: "220px 1fr auto",
-                            gap: 16,
-                            padding: "14px 0",
-                            borderBottom: i < configs.length - 1 ? "1px solid var(--border)" : "none",
-                            alignItems: "center",
-                        }}>
-                            <div>
-                                <div style={{ fontSize: "0.82rem", fontWeight: 600 }}>{cfg.label}</div>
-                                <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", fontFamily: "JetBrains Mono, monospace" }}>{cfg.key}</div>
-                            </div>
+        <div className="card fade-in fade-in-3">
+            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                {configs.map((cfg, i) => (
+                    <div key={cfg.key} className="config-row-mobile" style={{
+                        display: "grid",
+                        gridTemplateColumns: "220px 1fr auto",
+                        gap: 16,
+                        padding: "14px 0",
+                        borderBottom: i < configs.length - 1 ? "1px solid var(--border)" : "none",
+                        alignItems: "center",
+                    }}>
+                        <div>
+                            <div style={{ fontSize: "0.82rem", fontWeight: 600 }}>{cfg.label}</div>
+                            <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", fontFamily: "JetBrains Mono, monospace" }}>{cfg.key}</div>
+                        </div>
                             {cfg.editable ? (
                                 <input
                                     className="input"
