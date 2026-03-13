@@ -1,5 +1,10 @@
 # Gravity Claw
 
+![GitHub repo size](https://img.shields.io/github/repo-size/jcorcione/gravity-claw)
+![GitHub last commit](https://img.shields.io/github/last-commit/jcorcione/gravity-claw)
+![GitHub issues](https://img.shields.io/github/issues/jcorcione/gravity-claw)
+![License](https://img.shields.io/github/license/jcorcione/gravity-claw)
+
 **Gravity Claw** is the core open-source runtime powering the **AgenticHQ** platform.
 
 AgenticHQ is an experimental architecture for building **modular AI agents capable of orchestrating real-world tools, automation workflows, and persistent memory systems** using open infrastructure.
