@@ -1,6 +1,13 @@
-# AgenticHQ (AgenticHQ) — Quickstart Guide
+# Gravity Claw
 
-Welcome to **AgenticHQ**, a multi-tenant, cloud-native personal AI assistant powered by Groq, Claude, Supabase, Pinecone, and Vercel. 
+Gravity Claw is the primary open-source implementation of the **AgenticHQ** platform.
+
+AgenticHQ is an experimental architecture for building modular AI agents capable of orchestrating real-world tools, automation workflows, and persistent memory systems using open infrastructure.
+
+This repository contains the Gravity Claw runtime, developer tooling, and architecture experiments that power the AgenticHQ system.
+
+Repository:
+https://github.com/jcorcione/gravity-claw
 
 This guide will help you understand how to access and interact with your AI assistant depending on your environment.
 
