@@ -1,0 +1,28 @@
+# .gitleaks.toml — Gitleaks configuration for gravity-claw
+# Suppress false positives for public, non-sensitive values.
+
+title = "gravity-claw gitleaks config"
+
+[allowlist]
+  description = "Allowlisted non-sensitive values"
+  paths = [
+    # Never scan these — they are safe by design
+    '''.env.example''',
+    '''package-lock.json''',
+  ]
+  regexes = [
+    # Public Tailscale URL (not a secret)
+    '''desktop-4ekcfdi\.tail787c77\.ts\.net''',
+    # Public R2 URL
+    '''pub-b96f3866adb34da5b4275c6109e452e0\.r2\.dev''',
+    # Google Sheets spreadsheet ID (publicly readable)
+    '''19SFO3BJAftodeF3hvvj1eLxLRe5g8t76ynywIeMVwoE''',
+    # ElevenLabs voice IDs (not secrets)
+    '''2EsgRiyQL1INfP0QD8HP|wIQlXk1pwcszdjmUYKyP|XrExE9yKIg1WjnnlVkGX|piTKgcLEGmPE4e6mEKli|OB0Jj6v9DGLLgz8dD57i|uKym0Xqqyt9Rg1RSC4yc|DlY8s9SOfYLtqUczzSMQ|6F3SxDtOkYv75op5HViK''',
+    # Cloudflare R2 account ID
+    '''be0e9172c377b5b4703a7f71b31cd003''',
+    # Supabase project ref (public)
+    '''wbgxanusgjrfeavesoxh''',
+    # Placeholder strings used in .env.example
+    '''YOUR_[A-Z_]+_HERE''',
+  ]
