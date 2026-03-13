@@ -21,8 +21,13 @@ async function main() {
     console.log(user);
 
     // Force update the email and password
-    console.log("Forcing update to jcorcione@gmail.com and Salem_318!...");
-    const hashedPassword = hashPassword("Salem_318!");
+    const newPassword = process.env.WEB_PASSCODE;
+    if (!newPassword) {
+        console.error("❌ WEB_PASSCODE is not set in .env. Aborting.");
+        process.exit(1);
+    }
+    console.log("Forcing update to jcorcione@gmail.com with password from WEB_PASSCODE...");
+    const hashedPassword = hashPassword(newPassword);
     await sql`
         UPDATE users 
         SET email = 'jcorcione@gmail.com', password_hash = ${hashedPassword}
