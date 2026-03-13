@@ -1,6 +1,6 @@
 import type { Tool } from "./index.js";
 import { classifyEmail, extractJobDetails } from "../email-classifier.js";
-import { generateCoverLetter } from "../cover-letter.js";
+import { classifyJobFit, generateCoverLetter, generatePoliteDecline } from "../cover-letter.js";
 import { appendDraftLog, ensureSheetHeaders } from "../sheets.js";
 import { getOrCreateLabel, sendReply } from "../gmail-helpers.js";
 import { google } from "googleapis";
@@ -163,37 +163,68 @@ export const scanRecruiterEmailsTool: Tool = {
                     recruiterCount++;
                     const { company, role, recruiterName } = extractJobDetails(email);
 
-                    let coverLetter = "";
-                    try {
-                        coverLetter = await generateCoverLetter(email, role, company);
-                    } catch (e: any) {
-                        coverLetter = `Hi ${recruiterName},\n\nThank you for reaching out about the ${role} position at ${company}. I'm very interested in learning more. Please find my resume attached.\n\nBest regards,\nJohn Corcione\nSenior IT / Telecom PM | 816-679-3032 | jcorcione@gmail.com`;
-                        log.push(`⚠️ LLM cover letter failed, used fallback for: ${email.subject}`);
+                    // AI Fit Scoring
+                    const fit = await classifyJobFit(email, role, company).catch(() => ({
+                        fit: "weak" as const, roleTitle: role, reason: "Fit check failed"
+                    }));
+
+                    let responseBody = "";
+                    let status = "";
+
+                    if (fit.fit === "irrelevant") {
+                        // Silently archive — no reply needed
+                        if (!dryRun) {
+                            await gmail.users.messages.modify({
+                                userId: "me",
+                                id: msg.id,
+                                requestBody: {
+                                    addLabelIds: [jobBoardLabelId],
+                                    removeLabelIds: ["INBOX", "UNREAD", "CATEGORY_UPDATES", "CATEGORY_PROMOTIONS"],
+                                },
+                            });
+                        }
+                        log.push(`🗑️ [Irrelevant Recruiter] ${fit.roleTitle} @ ${company} — archived silently (${fit.reason})`);
+                        continue;
+
+                    } else if (fit.fit === "weak") {
+                        responseBody = await generatePoliteDecline(email, fit.roleTitle, company).catch(
+                            () => `Hi,\n\nThank you for reaching out. This role isn't quite the right fit for me at this time, but I appreciate you thinking of me.\n\nBest regards,\nJohn Corcione | 816-679-3032`
+                        );
+                        status = dryRun ? "Dry Run - Weak Fit Decline" : "Polite Decline Sent";
+                        log.push(`📨 [Weak Fit] ${recruiterName} @ ${company} — "${fit.roleTitle}" — polite decline sent (${fit.reason})`);
+
+                    } else {
+                        // STRONG FIT — full personalized cover letter
+                        responseBody = await generateCoverLetter(email, fit.roleTitle, company).catch(
+                            () => `Hi ${recruiterName},\n\nThank you for reaching out about the ${fit.roleTitle} position at ${company}. With 20+ years in IT/Telecom PM at T-Mobile, JPMorgan Chase, and Citibank, I'm very interested. Please find my resume attached — happy to schedule a call.\n\nBest regards,\nJohn Corcione | Senior IT/Telecom PM | 816-679-3032 | jcorcione@gmail.com`
+                        );
+                        status = dryRun ? "Dry Run - Strong Fit" : "Cover Letter Sent";
+                        log.push(`✉️ [Strong Fit] ${recruiterName} @ ${company} — "${fit.roleTitle}" — cover letter + resume sent`);
                     }
 
                     if (!dryRun) {
-                        // Send reply with cover letter + resume attached
+                        // Send reply
                         try {
                             await sendReply({
                                 gmail,
                                 senderEmail: SENDER_EMAIL,
                                 toEmail: email.fromEmail,
                                 subject: email.subject,
-                                body: coverLetter,
+                                body: responseBody,
                                 threadId: email.threadId,
                                 messageId: email.messageId,
                             });
                         } catch (e: any) {
-                            log.push(`❌ Failed to send reply for "${email.subject}": ${e.message}`);
+                            log.push(`❌ Send failed for "${email.subject}": ${e.message}`);
                         }
 
-                        // Apply Recruiter label + archive
+                        // Apply Recruiter label + full archive (including category tabs)
                         await gmail.users.messages.modify({
                             userId: "me",
                             id: msg.id,
                             requestBody: {
                                 addLabelIds: [recruiterLabelId],
-                                removeLabelIds: ["INBOX", "UNREAD"],
+                                removeLabelIds: ["INBOX", "UNREAD", "CATEGORY_UPDATES", "CATEGORY_PROMOTIONS"],
                             },
                         });
                     }
@@ -205,13 +236,11 @@ export const scanRecruiterEmailsTool: Tool = {
                             recruiterName,
                             recruiterEmail: email.fromEmail,
                             company,
-                            role,
-                            coverLetterDraft: dryRun ? "[DRY RUN — not sent]" : "[Sent via Gmail]",
-                            status: dryRun ? "Dry Run" : "Sent",
+                            role: fit.roleTitle,
+                            coverLetterDraft: responseBody.slice(0, 500),
+                            status,
                         });
                     } catch { /* non-fatal */ }
-
-                    log.push(`✉️ [Recruiter] ${recruiterName} @ ${company} — "${role}" — reply sent + labeled "${RECRUITER_LABEL}"`);
 
                 } else {
                     otherCount++;
