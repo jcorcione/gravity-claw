@@ -1,85 +1,277 @@
 # Gravity Claw
 
-Gravity Claw is the primary open-source implementation of the **AgenticHQ** platform.
+**Gravity Claw** is the core open-source runtime powering the **AgenticHQ** platform.
 
-AgenticHQ is an experimental architecture for building modular AI agents capable of orchestrating real-world tools, automation workflows, and persistent memory systems using open infrastructure.
+AgenticHQ is an experimental architecture for building **modular AI agents capable of orchestrating real-world tools, automation workflows, and persistent memory systems** using open infrastructure.
 
 This repository contains the Gravity Claw runtime, developer tooling, and architecture experiments that power the AgenticHQ system.
 
-Repository:
+Repository:  
 https://github.com/jcorcione/gravity-claw
 
-This guide will help you understand how to access and interact with your AI assistant depending on your environment.
+---
+
+# What is AgenticHQ?
+
+AgenticHQ is a modular AI agent platform designed to explore how autonomous systems can safely coordinate:
+
+- developer tools  
+- workflow automation systems  
+- persistent memory  
+- API integrations  
+- content generation pipelines  
+- productivity workflows  
+
+The platform prioritizes:
+
+- **developer control**
+- **transparent architecture**
+- **local or lightweight deployment**
+- **privacy-first data isolation**
+
+AgenticHQ aims to demonstrate how AI agent systems can be built using **open infrastructure instead of proprietary black-box platforms**.
 
 ---
 
-## 1. Web Portal (For Deep Work & Family Members)
-The Web Portal is the primary way for you and any authorized users to interact with the AgenticHQ chat interface. It features a rich, native ChatGPT-style experience and fully supports memory isolation.
+# What is Gravity Claw?
 
-* **URL:** [https://gravity-claw-sigma.vercel.app](https://gravity-claw-sigma.vercel.app)
-* **How to login:** 
-  - Use the email address and password associated with your account.
-  - If you are a new user, you can use the "Register here" button.
+Gravity Claw is the **primary runtime implementation** of the AgenticHQ architecture.
 
-Once logged in, your session is securely tied to your profile. The AI will remember your individual facts, schedule, and conversational context without mixing it with other family members.
+It provides the system responsible for coordinating:
 
----
+- tool execution
+- automation workflows
+- agent memory retrieval
+- developer interaction via CLI
+- messaging integrations
 
-## 2. Admin Dashboard (For the Super User)
-The Admin Dashboard is a specialized "Command Center" designed exclusively for the system owner. It is styled similarly to Open WebUI and allows you to monitor system health and trigger background automation.
+Gravity Claw integrates several open technologies including:
 
-* **URL:** [https://gravity-claw-sigma.vercel.app/admin.html](https://gravity-claw-sigma.vercel.app/admin.html)
-* **How to login:** 
-  - Log in using the system owner email (e.g., `admin@nexus.ai`) and password.
-  - The system will verify that your underlying `user_id` matches the `ALLOWED_USER_IDS` environment whitelist before granting access.
-* **Capabilities:** 
-  - **Dashboard:** Monitor database sizes (Supabase/Pinecone) and active user counts.
-  - **Campaigns:** Manually trigger the Recruiter Email Scanner (Lead Generation).
-  - **Tasks:** Trigger background cron jobs like the Morning Briefing or Smart Recommendations.
+- Node.js runtime
+- Supabase (structured memory)
+- Pinecone (vector memory)
+- Groq Whisper transcription
+- workflow orchestration
+- FFmpeg media pipelines
 
 ---
 
-## 3. Telegram (For On-The-Go & Voice Notes)
-Because AgenticHQ is integrated with Groq Whisper, it can handle robust voice transcriptions. Telegram is the best way to interact on mobile.
+# Key Features
 
-* **Active Bot:** `@JCAntiGravBot` ← use this (Railway backend)
-* **Legacy Bot:** `@JohsClawBot` (old EC2 instance — retiring soon, do not use)
-* **Proactive Alerts:** Telegram receives the 8:00 AM Morning Briefing and mid-day Smart Recommendations.
-* **Security:** Admin-only mode — ignores any Telegram ID not in the `ALLOWED_USER_IDS` whitelist.
+### Modular Agent Architecture
+Gravity Claw is built as a modular runtime that allows AI agents to orchestrate tools and workflows rather than operate as a single monolithic chatbot.
+
+### Multi-Layer Memory System
+The platform uses two types of persistent memory:
+
+**Factual Memory**
+
+Stored in **Supabase**, allowing the agent to retain structured facts about users.
+
+Example:
+> "I just learned React."
+
+The system permanently stores that fact so it does not repeatedly request the same information.
+
+**Semantic Memory**
+
+Long conversations are vectorized and stored in **Pinecone**, allowing the system to recall past discussions organically.
+
+### Privacy-First Design
+
+Every database table enforces a strict `user_id` constraint.
+
+This ensures:
+
+- user data isolation
+- zero cross-account memory leakage
+- secure automation workflows
+
+### Developer-First Tooling
+
+Gravity Claw includes multiple interfaces for interacting with the agent system depending on the environment.
 
 ---
 
-## 4. Discord Bot
-* **Invite:** [Add to Server](https://discord.com/oauth2/authorize?client_id=1477087703165046785)
-* Use when you're already in Discord and want Jarvis without switching apps.
+# How to Access the Agent
+
+This guide explains how to interact with the AgenticHQ assistant depending on your environment.
 
 ---
 
-## 5. Terminal UI (For Developers)
-If you are actively coding or managing the server infrastructure, you can talk to AgenticHQ without leaving your command line.
+# 1. Web Portal (Primary Interface)
 
-* **How to run:**
-  ```bash
-  cd path/to/gravity-claw
-  npm run cli
-  ```
-* **Why use it?** It is distraction-free, lightning-fast, and connects directly to the live memory databases via the terminal.
+The Web Portal provides a full **ChatGPT-style interface** for interacting with the agent.
+
+URL  
+https://gravity-claw-sigma.vercel.app
+
+### Login
+
+Use the email address and password associated with your account.
+
+New users can register using the **Register here** option.
+
+Each session is tied to the authenticated profile, ensuring **memory isolation between users**.
+
+The agent will remember:
+
+- personal facts
+- schedules
+- previous conversations
+
+without mixing them with other accounts.
 
 ---
 
-### Core Principles of AgenticHQ
-1. **Factual Memory:** If you tell AgenticHQ a specific fact (e.g., "I just learned React"), it will permanently save it to your Supabase profile so it never asks again.
-2. **Semantic Memory:** Long conversations and conceptual ideas are vectorized and saved to Pinecone, allowing the AI to organically recall past discussions.
-3. **Data Privacy:** Every single database table has a strict `user_id` constraint. User A can never accidentally query or view User B's memory, emails, or calendar events.
+# 2. Admin Dashboard
+
+The Admin Dashboard acts as a **Command Center** for the system owner.
+
+URL  
+https://gravity-claw-sigma.vercel.app/admin.html
+
+### Authentication
+
+The dashboard verifies that the authenticated user matches the `ALLOWED_USER_IDS` environment whitelist.
+
+### Capabilities
+
+**System Monitoring**
+
+- database usage (Supabase / Pinecone)
+- active user sessions
+
+**Automation Control**
+
+- trigger Recruiter Email Scanner
+- launch background automation workflows
+
+**Task Management**
+
+- morning briefing automation
+- recommendation engine triggers
 
 ---
 
-### Desktop Services (Required for Video Pipeline)
-These must be running on your desktop PC for video creation to work:
+# 3. Telegram Integration
+
+Telegram provides the best mobile interface for interacting with the agent.
+
+Because AgenticHQ integrates **Groq Whisper**, voice messages are automatically transcribed.
+
+### Active Bot
+
+`@JCAntiGravBot`
+
+Railway backend deployment.
+
+### Legacy Bot
+
+`@JohsClawBot`
+
+Old EC2 instance.  
+Scheduled for retirement.
+
+### Capabilities
+
+- voice message transcription
+- proactive alerts
+- daily briefing notifications
+
+### Security
+
+The Telegram bot operates in **admin-only mode**.
+
+Any Telegram ID not listed in `ALLOWED_USER_IDS` is ignored.
+
+---
+
+# 4. Discord Bot
+
+Discord can also be used to interact with the agent.
+
+Invite Link  
+https://discord.com/oauth2/authorize?client_id=1477087703165046785
+
+This allows you to access the agent without leaving Discord.
+
+---
+
+# 5. Terminal Interface (Developers)
+
+Developers can interact with the agent directly from the command line.
+
+cd gravity-claw npm run cli
+
+The CLI connects directly to the system's memory databases and provides a fast environment for testing workflows.
+
+Advantages:
+
+- distraction-free interface
+- rapid testing of agent behavior
+- direct system access
+
+---
+
+# Core Principles of AgenticHQ
+
+### Factual Memory
+
+User-provided facts are permanently stored in Supabase.
+
+The system retains personal knowledge so it does not repeatedly ask for the same information.
+
+### Semantic Memory
+
+Long conversations are vectorized and stored in Pinecone.
+
+This allows the agent to recall relevant discussions from past sessions.
+
+### Data Privacy
+
+Every database table enforces strict `user_id` isolation.
+
+Users cannot access:
+
+- other users' memory
+- email data
+- calendar events
+
+This ensures secure multi-user deployments.
+
+---
+
+# Desktop Services (Video Pipeline)
+
+These services must be running on the desktop host machine for media generation workflows.
 
 | Service | Command | Tailscale Path |
 |---|---|---|
 | Flask FFmpeg Compiler | `cd C:\Users\jcorc\video_compilation && python grace_note_compiler_fixed.py` | `/compiler` |
-| ComfyUI (Thumbnails) | Run `nvidia_gpu.bat` | `/comfy` |
+| ComfyUI (Thumbnail Generation) | run `nvidia_gpu.bat` | `/comfy` |
 
-Tailscale Funnel is path-routed on `https://desktop-4ekcfdi.tail787c77.ts.net` — both services coexist on the same public URL.
+Both services are routed using **Tailscale Funnel**:
+
+https://desktop-4ekcfdi.tail787c77.ts.net
+
+---
+
+# Project Goals
+
+Gravity Claw serves as an experimentation platform for:
+
+- agent-driven automation systems
+- AI developer tooling
+- workflow orchestration
+- open agent architectures
+
+The long-term goal is to provide **reproducible patterns for building modular AI agents using open infrastructure**.
+
+---
+
+# Contributing
+
+Gravity Claw is an experimental open-source project exploring practical AI agent architectures.
+
+Contributions, architecture discussions, and feedback are welcome.
