@@ -3,7 +3,7 @@
 ![Repo Size](https://img.shields.io/github/repo-size/jcorcione/gravity-claw?style=flat-square)
 ![Last Commit](https://img.shields.io/github/last-commit/jcorcione/gravity-claw?style=flat-square)
 ![Issues](https://img.shields.io/github/issues/jcorcione/gravity-claw?style=flat-square)
-![License](https://img.shields.io/github/license/jcorcione/gravity-claw?style=flat-square)
+![License](https://img.shields.io/github/license/jcorcione/gravity-claw?style=flat-square&color=red)
 
 **Gravity Claw** is the core open-source runtime powering the **AgenticHQ** platform.
 
