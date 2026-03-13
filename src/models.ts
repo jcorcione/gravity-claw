@@ -16,12 +16,12 @@ const models: ModelEntry[] = [
     // ── Free Models ────────────────────────────────────────────────────────────
     { alias: "Auto", modelId: "openrouter/auto", free: true, description: "OpenRouter smart router — picks best available model" },
     { alias: "Coder", modelId: "qwen/qwen-3-coder-480b-a35b:free", free: true, description: "Preferred for all code tasks" },
-    { alias: "Flash", modelId: "stepfun/step-3.5-flash:free", free: true, description: "Default — fast, general purpose" },
-    { alias: "Gemini", modelId: "google/gemini-2.0-flash-thinking-exp:free", free: true, description: "Strong reasoning fallback" },
+    { alias: "Flash", modelId: "google/gemini-flash-1.5", free: true, description: "Default — fast, non-reasoning, excellent tool-calling, no step limit" },
+    { alias: "Gemini", modelId: "google/gemini-2.5-flash-preview", free: true, description: "Strong reasoning fallback" },
     { alias: "Genius", modelId: "deepseek/deepseek-r1-0528:free", free: true, description: "Deep reasoning tasks" },
     { alias: "GLM", modelId: "z-ai/glm-4.5-air:free", free: true, description: "Agent-centric, thinking + non-thinking modes" },
     { alias: "GPT", modelId: "openai/gpt-oss-120b:free", free: true, description: "OpenAI open-weight, high reasoning" },
-    { alias: "Kimi", modelId: "moonshotai/kimi-k2:free", free: true, description: "Best free agentic tool-calling (300+ sequential calls)" },
+    { alias: "Kimi", modelId: "moonshotai/kimi-k2:free", free: true, description: "Best free agentic tool-calling (300+ sequential calls) — use for escalation" },
     { alias: "Llama", modelId: "meta-llama/llama-3.3-70b-instruct:free", free: true, description: "Reliable general-purpose fallback" },
     { alias: "Trinity", modelId: "arcee-ai/trinity-large-preview:free", free: true, description: "Best for creative writing, scripts, chat" },
 
@@ -74,7 +74,8 @@ export function formatModelList(): string {
 }
 
 export function getFallbackSmarterModel(): ModelEntry {
-    return aliasMap.get("sonnet") ?? models.find(m => !m.free) ?? models[0];
+    // Use kimi-k2 as free escalation target — best agentic tool-calling on free tier
+    return aliasMap.get("kimi") ?? aliasMap.get("sonnet") ?? models.find(m => !m.free) ?? models[0];
 }
 
 export function resetToDefaultModel(): void {
