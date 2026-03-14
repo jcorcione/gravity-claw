@@ -64,6 +64,22 @@ YouTube Shorts spec: 1080×1920 (9:16 vertical), H.264, AAC 192kbps, up to 60 se
         let imagePath = input.imagePath as string;
         let audioPath = input.audioPath as string;
 
+        // Handle base64-encoded audio: "base64:filename.mp3:BASE64DATA"
+        // This is used when the audio is generated on Railway and sent to the local compiler.
+        if (audioPath.startsWith("base64:")) {
+            const parts = audioPath.split(":");
+            const audioFilename = parts[1]; // e.g. gravity-claw-voiceover-12345.mp3
+            const audioData = parts.slice(2).join(":"); // rest is base64
+            const localAudioPath = path.join(COMFYUI_OUTPUT, audioFilename);
+            try {
+                fs.writeFileSync(localAudioPath, Buffer.from(audioData, "base64"));
+                audioPath = localAudioPath;
+                console.log(`[video_assemble] Wrote base64 audio to local file: ${localAudioPath}`);
+            } catch (e: any) {
+                return `Error: Could not write audio to local disk: ${e.message}`;
+            }
+        }
+
         // Extract filename from ComfyUI tailscale URL if it is one, to avoid local loopback network errors
         if (imagePath.includes("view?filename=")) {
             const urlObj = new URL(imagePath);
