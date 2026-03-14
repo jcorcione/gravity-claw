@@ -58,10 +58,19 @@ Return ONLY valid JSON matching this exact structure — no markdown, no explana
   },
   "title": "<SEO-optimized title 60-70 chars>",
   "tags": ["tag1","tag2","tag3","tag4","tag5"],
-  "thumbnailConcept": "<text overlay + visual description for faceless thumbnail>",
+  "thumbnailConcept": "<PURE VISUAL SCENE — think cinematographer, NO text, NO words, NO letters>",
   "estimatedDuration": "<e.g. '45 seconds'>",
   "scriptForReading": "<full concatenated script as one flowing text>"
-}`;
+}
+
+CRITICAL RULE for thumbnailConcept:
+Think like a CINEMATOGRAPHER or FILM ART DIRECTOR — describe ONLY the visual scene.
+- Describe light, color, atmosphere, setting, mood, texture, depth-of-field
+- NO text, NO words, NO letters, NO captions in the image description
+- Subtitles and text overlays are added separately via FFmpeg — do NOT include them in this prompt
+- Good example: "soft morning light through a church window, warm amber glow on empty wooden pews, dust particles floating in sunbeam, golden bokeh, cinematic wide angle, peaceful, 8k"
+- Bad example: "text overlay saying TIRED? with sunset background" ← NEVER do this`;
+
 
 // ─── Gigawerx System Prompt ───────────────────────────────────────────────────
 const GIGAWERX_SYSTEM = `You are a viral content scriptwriter for The Gigawerx Channel, a faceless YouTube Shorts channel covering AI tools, gig economy, tech, freelancing, and viral trends.
@@ -106,10 +115,19 @@ Return ONLY valid JSON matching this exact structure — no markdown, no explana
   },
   "title": "<SEO-optimized title 60-70 chars>",
   "tags": ["tag1","tag2","tag3","tag4","tag5"],
-  "thumbnailConcept": "<bold text overlay + visual for faceless thumbnail>",
+  "thumbnailConcept": "<PURE VISUAL SCENE — think cinematographer, NO text, NO words, NO letters>",
   "estimatedDuration": "<e.g. '30 seconds'>",
   "scriptForReading": "<full concatenated script as one flowing text>"
-}`;
+}
+
+CRITICAL RULE for thumbnailConcept:
+Think like a CINEMATOGRAPHER or FILM ART DIRECTOR — describe ONLY the visual scene.
+- Describe light, color, atmosphere, setting, mood, tech props, screens, depth-of-field
+- NO text, NO words, NO letters, NO UI mockups with readable text
+- Subtitles and text overlays are added separately via FFmpeg — do NOT include in this prompt
+- Good example: "hyper-realistic glowing AI neural network diagram floating in dark room, neon cyan light trails, holographic interface panels, dramatic side lighting, cinematic 8k"
+- Bad example: "bold white text overlay saying AI TOOL with dark background" ← NEVER do this`;
+
 
 async function generateScript(
     systemPrompt: string,

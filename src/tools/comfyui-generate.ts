@@ -176,7 +176,9 @@ export const comfyuiGenerateTool = {
 
         const fullPrompt = (stylePrefix[channel] || "") + userPrompt;
         const negativePrompt = userNegative ||
-            "faces, people, text, watermark, low quality, blurry, distorted, deformed, ugly, bad anatomy, out of frame, cropped, oversaturated";
+            "text, words, letters, typography, writing, captions, subtitles, watermark, logo, numbers, title, labels, speech bubbles, signs with text, banners, " +
+            "faces, people, portrait, anatomy, character, person, figure, human, " +
+            "low quality, blurry, distorted, deformed, ugly, bad anatomy, out of frame, cropped, oversaturated, noise, grain";
 
         // Build and submit workflow
         const workflow = buildThumbnailWorkflow(fullPrompt, negativePrompt, width, height, MODELS.thumbnail);
