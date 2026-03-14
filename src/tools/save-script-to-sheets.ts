@@ -23,15 +23,25 @@ This is the final step in the content generation loop. Once the script and thumb
     inputSchema: {
         type: "object",
         properties: {
-            channel: { type: "string", description: "e.g., gracenote or gigawerx" },
-            topic: { type: "string" },
-            title: { type: "string" },
-            hook: { type: "string" },
-            main_script: { type: "string" },
-            cta: { type: "string" },
-            thumbnail_prompt: { type: "string", description: "Detailed 1-sentence prompt for the ComfyUI thumbnail generation (e.g. 'A dark moody cross at sunset, golden hour lighting'). Do NOT include negative prompts here." }
+            items: {
+                type: "array",
+                description: "Array of video scripts to save.",
+                items: {
+                    type: "object",
+                    properties: {
+                        channel: { type: "string", description: "e.g., gracenote or gigawerx" },
+                        topic: { type: "string" },
+                        title: { type: "string" },
+                        hook: { type: "string" },
+                        main_script: { type: "string" },
+                        cta: { type: "string" },
+                        thumbnail_prompt: { type: "string", description: "Detailed 1-sentence prompt for the ComfyUI thumbnail generation (e.g. 'A dark moody cross at sunset, golden hour lighting'). Do NOT include negative prompts here." }
+                    },
+                    required: ["channel", "topic", "title", "hook", "main_script", "cta", "thumbnail_prompt"]
+                }
+            }
         },
-        required: ["channel", "topic", "title", "hook", "main_script", "cta", "thumbnail_prompt"]
+        required: ["items"]
     },
     execute: async (input) => {
         const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
@@ -43,32 +53,26 @@ This is the final step in the content generation loop. Once the script and thumb
             const auth = getOAuth2Client();
             const sheets = google.sheets({ version: "v4", auth });
 
-            const channel = input.channel as string;
-            const topic = input.topic as string;
-            const title = input.title as string;
-            const hook = input.hook as string;
-            const main_script = input.main_script as string;
-            const cta = input.cta as string;
-            const thumbnail_prompt = input.thumbnail_prompt as string;
+            const items = input.items as any[];
             const timestamp = new Date().toISOString();
-            const voice = channel === "gigawerx" ? "male_01.wav" : "female_01.wav";
 
             // Headers: Timestamp | Channel | Topic | Title | Hook | Script | CTA | Thumbnail Prompt | Voice | Status | Video Path
-            const values = [
-                [
+            const values = items.map(item => {
+                const voice = item.channel === "gigawerx" ? "male_01.wav" : "female_01.wav";
+                return [
                     timestamp,
-                    channel,
-                    topic,
-                    title,
-                    hook,
-                    main_script,
-                    cta,
-                    thumbnail_prompt,
+                    item.channel,
+                    item.topic,
+                    item.title,
+                    item.hook,
+                    item.main_script,
+                    item.cta,
+                    item.thumbnail_prompt,
                     voice,
                     "Pending",
                     "" // Video Path will be filled by N8N
-                ]
-            ];
+                ];
+            });
 
             const response = await sheets.spreadsheets.values.append({
                 spreadsheetId,
@@ -79,7 +83,7 @@ This is the final step in the content generation loop. Once the script and thumb
                 }
             });
             
-            return `✅ Successfully saved video script directly to Google Sheets! Pipeline Row Updated: ${response.data.updates?.updatedRange}. Status set to 'Pending' for N8N rendering.`;
+            return `✅ Successfully saved ${items.length} video script(s) directly to Google Sheets! Pipeline Row Updated: ${response.data.updates?.updatedRange}. Status set to 'Pending' for N8N rendering.`;
         } catch (error: any) {
             return `Error saving to Google Sheets: ${error.message}`;
         }
