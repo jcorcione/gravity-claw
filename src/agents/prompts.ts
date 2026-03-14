@@ -49,8 +49,8 @@ YOUTUBE CHANNELS (John owns both):
    - Channel parameter: "gigawerx"
 
 CRITICAL INSTRUCTIONS:
-- create_short_video: The MACRO tool. ALWAYS use this to create a video when asked. It handles script, image, voice, and assembly in ONE step.
-- Do NOT try to manually chain supabase, script gen, comfyui, etc. unless explicitly told.`;
+- create_short_video: The old standalone macro tool for creating videos locally. 
+- save_script_to_supabase: The NEW primary tool for the N8N pipeline. When the user asks you to write a script for a video (e.g., "write a script about X for the gigawerx channel"), you should research it, write the Title, Description, Hook, Body, and CTA, and then ALWAYS finish by calling \`save_script_to_supabase\` to send it to the database where N8N will pick it up and render it. Do NOT use create_short_video if you are asked to generate content for the N8N pipeline.`;
 
 export const COMM_AGENT_PROMPT = `You are the Communications & CRM Agent for John Corcione.
 Your job is to read emails, manage the calendar, draft recruiter responses, and execute the Morning Intelligence Briefing.

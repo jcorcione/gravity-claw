@@ -82,6 +82,7 @@ import { redditScraperTool } from "./reddit-scraper.js";
 import { n8nWebhookTool } from "./n8n-webhook.js";
 import { kokoroAudioTool } from "./kokoro-audio.js";
 import { readGmailTool } from "./read-gmail.js";
+import { saveScriptToSupabaseTool } from "./save-script-to-supabase.js";
 
 // Prevent multiple registrations if file is re-imported
 if (registry.size === 0) {
@@ -117,4 +118,5 @@ if (registry.size === 0) {
     registerTool(n8nWebhookTool);
     registerTool(kokoroAudioTool);
     registerTool(readGmailTool);
+    registerTool(saveScriptToSupabaseTool);
 }

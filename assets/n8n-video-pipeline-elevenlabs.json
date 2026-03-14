@@ -1,0 +1,224 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "video-generator",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "id": "ae3fa3d2-fc82-451f-b2a0-ac7143542033",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [960, 1648],
+      "webhookId": "video-generator"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1b2c3d4",
+              "name": "script",
+              "value": "={{ $json.body.script }}",
+              "type": "string"
+            },
+            {
+              "id": "e5f6g7h8",
+              "name": "voice",
+              "value": "={{ $json.body.voice }}",
+              "type": "string"
+            },
+            {
+              "id": "i9j0k1l2",
+              "name": "image_prompts",
+              "value": "={{ $json.body.image_prompts }}",
+              "type": "array"
+            },
+            {
+              "id": "ch1channel",
+              "name": "channel",
+              "value": "={{ $json.body.channel }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e633e8e5-2733-4d75-8560-d2cad3c40044",
+      "name": "Extract Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1168, 1648]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "v1voiceid",
+              "name": "elevenlabs_voice_id",
+              "value": "={{ $json.channel === 'gracenote' ? 'wIQlXk1pwcszdjmUYKyP' : '2EsgRiyQL1INfP0QD8HP' }}",
+              "type": "string"
+            },
+            {
+              "id": "v2script",
+              "name": "script",
+              "value": "={{ $json.script }}",
+              "type": "string"
+            },
+            {
+              "id": "v3channel",
+              "name": "channel",
+              "value": "={{ $json.channel }}",
+              "type": "string"
+            },
+            {
+              "id": "v4imageprompts",
+              "name": "image_prompts",
+              "value": "={{ $json.image_prompts }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b1c2d3e4-5678-90ab-cdef-111213141516",
+      "name": "Map Voice ID",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1380, 1648]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.elevenlabs.io/v1/text-to-speech/{{ $json.elevenlabs_voice_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "xi-api-key",
+              "value": "YOUR_ELEVENLABS_API_KEY_HERE"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Accept",
+              "value": "audio/mpeg"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"text\": \"{{ $('Map Voice ID').item.json.script }}\",\n  \"model_id\": \"eleven_multilingual_v2\",\n  \"voice_settings\": {\n    \"stability\": 0.45,\n    \"similarity_boost\": 0.80,\n    \"style\": 0.30,\n    \"use_speaker_boost\": true\n  }\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "voiceover_audio"
+            }
+          }
+        }
+      },
+      "id": "el1elevenlabs-tts-node",
+      "name": "Generate TTS (ElevenLabs)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1600, 1520]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/home/node/.n8n/voiceover_{{ $now.toMillis() }}.mp3",
+        "dataPropertyName": "voiceover_audio",
+        "options": {}
+      },
+      "id": "wb1writebinary-audio",
+      "name": "Save Audio to Disk",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [1800, 1520]
+    },
+    {
+      "parameters": {
+        "workflow": "={\n  \"3\": {\n    \"inputs\": {\n      \"seed\": {{ Math.floor(Math.random() * 1000000000000) }},\n      \"steps\": 20,\n      \"cfg\": 8.0,\n      \"sampler_name\": \"euler\",\n      \"scheduler\": \"normal\",\n      \"denoise\": 1,\n      \"model\": [\"4\", 0],\n      \"positive\": [\"6\", 0],\n      \"negative\": [\"7\", 0],\n      \"latent_image\": [\"5\", 0]\n    },\n    \"class_type\": \"KSampler\"\n  },\n  \"4\": {\n    \"inputs\": {\n      \"ckpt_name\": \"realvisxlV50_v50LightningBakedvae.safetensors\"\n    },\n    \"class_type\": \"CheckpointLoaderSimple\"\n  },\n  \"5\": {\n    \"inputs\": {\n      \"width\": 1080,\n      \"height\": 1920,\n      \"batch_size\": 1\n    },\n    \"class_type\": \"EmptyLatentImage\"\n  },\n  \"6\": {\n    \"inputs\": {\n      \"text\": \"{{ $('Map Voice ID').item.json.image_prompts[0] }}\",\n      \"clip\": [\"4\", 1]\n    },\n    \"class_type\": \"CLIPTextEncode\"\n  },\n  \"7\": {\n    \"inputs\": {\n      \"text\": \"text, words, letters, typography, writing, captions, subtitles, watermark, logo, numbers, title, signs with text, faces, people, portrait, human, low quality, blurry, distorted, deformed, ugly, bad anatomy, out of frame, oversaturated, noise, grain\",\n      \"clip\": [\"4\", 1]\n    },\n    \"class_type\": \"CLIPTextEncode\"\n  },\n  \"8\": {\n    \"inputs\": {\n      \"samples\": [\"3\", 0],\n      \"vae\": [\"4\", 2]\n    },\n    \"class_type\": \"VAEDecode\"\n  },\n  \"9\": {\n    \"inputs\": {\n      \"filename_prefix\": \"gravity_claw_thumb\",\n      \"images\": [\"8\", 0]\n    },\n    \"class_type\": \"SaveImage\"\n  }\n}\n",
+        "outputFormat": "png"
+      },
+      "id": "54e1cab7-895b-46d4-b6b8-a67c3e821161",
+      "name": "Generate Image (ComfyUI)",
+      "type": "n8n-nodes-comfyui.comfyui",
+      "typeVersion": 1,
+      "position": [1600, 1776],
+      "credentials": {
+        "comfyUIApi": {
+          "id": "YbqnfbA2fymWoTNg",
+          "name": "ComfyUI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "id": "fd5d442f-8973-457b-b1f4-3a0c1e8029ce",
+      "name": "Merge Audio + Image",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [2020, 1648]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:5055/assemble",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"image_path\": \"{{ $('Generate Image (ComfyUI)').item.json.filename }}\",\n  \"audio_path\": \"{{ $('Save Audio to Disk').item.json.fileName.replace('/home/node/.n8n/', 'C:/Users/jcorc/.n8n/') }}\",\n  \"effect\": \"zoom_in\",\n  \"subtitle\": \"{{ $('Map Voice ID').item.json.script }}\",\n  \"dynamic_subtitles\": true,\n  \"bg_music_dir\": \"C:/Users/jcorc/Music\"\n}",
+        "options": {}
+      },
+      "id": "0d1fa317-cb58-4631-a967-d37d83743aed",
+      "name": "Assemble Video (Flask)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2240, 1648]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{ "node": "Extract Payload", "type": "main", "index": 0 }]]
+    },
+    "Extract Payload": {
+      "main": [[{ "node": "Map Voice ID", "type": "main", "index": 0 }]]
+    },
+    "Map Voice ID": {
+      "main": [
+        [
+          { "node": "Generate TTS (ElevenLabs)", "type": "main", "index": 0 },
+          { "node": "Generate Image (ComfyUI)", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Generate TTS (ElevenLabs)": {
+      "main": [[{ "node": "Save Audio to Disk", "type": "main", "index": 0 }]]
+    },
+    "Save Audio to Disk": {
+      "main": [[{ "node": "Merge Audio + Image", "type": "main", "index": 0 }]]
+    },
+    "Generate Image (ComfyUI)": {
+      "main": [[{ "node": "Merge Audio + Image", "type": "main", "index": 1 }]]
+    },
+    "Merge Audio + Image": {
+      "main": [[{ "node": "Assemble Video (Flask)", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "83ecaed23d9adc60dff1230fca6a92396494b370af7cf4755373724bb06a75ce"
+  }
+}

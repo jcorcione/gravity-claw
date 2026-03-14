@@ -1,0 +1,470 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "e4b52c1e-f190-449e-ba21-fe5cb2b5ff88",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        260,
+        1440
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "table": "video_pipeline",
+        "limit": 1,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "Pending"
+            }
+          ]
+        }
+      },
+      "id": "supabase-get-1",
+      "name": "Get Pending Script",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        480,
+        1440
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "REPLACE_WITH_YOUR_SUPABASE_CRED",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.id }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "if-1",
+      "name": "Row Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        700,
+        1440
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": "video_pipeline",
+        "updateKey": "id",
+        "dataPropertyName": "updateData"
+      },
+      "id": "supabase-update-1",
+      "name": "Set Processing",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        920,
+        1440
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "REPLACE_WITH_YOUR_SUPABASE_CRED",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b0d468be-3221-4d1a-9694-811bbbd6c382",
+              "name": "updateData.id",
+              "value": "={{ $('Get Pending Script').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "89eb5b37-299f-44e2-a080-60b5cf8dc51b",
+              "name": "updateData.status",
+              "value": "Processing",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-update-data-1",
+      "name": "Map DB Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        820,
+        1240
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "v1alltalkvoice",
+              "name": "alltalk_voice",
+              "value": "={{ $('Get Pending Script').item.json.tts_voice || 'female_01.wav' }}",
+              "type": "string"
+            },
+            {
+              "id": "v2script",
+              "name": "script",
+              "value": "={{ $('Get Pending Script').item.json.main_script }}",
+              "type": "string"
+            },
+            {
+              "id": "v4imageprompts",
+              "name": "image_prompts",
+              "value": "={{ [ $('Get Pending Script').item.json.description + ', ' + $('Get Pending Script').item.json.generative_style ] }}",
+              "type": "array"
+            },
+            {
+              "id": "v5rowid",
+              "name": "row_id",
+              "value": "={{ $('Get Pending Script').item.json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b1c2d3e4-5678-90ab-cdef-111213141516",
+      "name": "Map Voice ID",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1140,
+        1440
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:7851/api/generate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"text\": \"{{ $('Map Voice ID').item.json.script.replace(/\"/g, '\\\\\"') }}\",\n  \"voice\": \"{{ $('Map Voice ID').item.json.alltalk_voice }}\",\n  \"language\": \"en\",\n  \"temperature\": 0.7,\n  \"repetition_penalty\": 1.0,\n  \"output_file\": \"outputs/n8n_generated_{{ $now.toMillis() }}.wav\"\n}",
+        "options": {
+            "response": {
+                "response": {
+                    "responseFormat": "json"
+                }
+            }
+        }
+      },
+      "id": "el1alltalk-tts-node",
+      "name": "Generate TTS (AllTalk)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1380,
+        1340
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=http://host.docker.internal:7851{{ $json.data.audio_path.replace('outputs', '/audio') }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "voiceover_audio"
+            }
+          }
+        }
+      },
+      "id": "dl1download-alltalk",
+      "name": "Download Audio File",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1600,
+        1340
+      ]
+    },
+    {
+      "parameters": {
+        "workflow": "={\n  \"3\": {\n    \"inputs\": {\n      \"seed\": {{ Math.floor(Math.random() * 1000000000000) }},\n      \"steps\": 20,\n      \"cfg\": 8.0,\n      \"sampler_name\": \"euler\",\n      \"scheduler\": \"normal\",\n      \"denoise\": 1,\n      \"model\": [\"4\", 0],\n      \"positive\": [\"6\", 0],\n      \"negative\": [\"7\", 0],\n      \"latent_image\": [\"5\", 0]\n    },\n    \"class_type\": \"KSampler\"\n  },\n  \"4\": {\n    \"inputs\": {\n      \"ckpt_name\": \"realvisxlV50_v50LightningBakedvae.safetensors\"\n    },\n    \"class_type\": \"CheckpointLoaderSimple\"\n  },\n  \"5\": {\n    \"inputs\": {\n      \"width\": 1080,\n      \"height\": 1920,\n      \"batch_size\": 1\n    },\n    \"class_type\": \"EmptyLatentImage\"\n  },\n  \"6\": {\n    \"inputs\": {\n      \"text\": \"{{ $('Map Voice ID').item.json.image_prompts[0] }}\",\n      \"clip\": [\"4\", 1]\n    },\n    \"class_type\": \"CLIPTextEncode\"\n  },\n  \"7\": {\n    \"inputs\": {\n      \"text\": \"text, words, letters, typography, writing, captions, subtitles, watermark, logo, numbers, title, signs with text, faces, people, portrait, human, low quality, blurry, distorted, deformed, ugly, bad anatomy, out of frame, oversaturated, noise, grain\",\n      \"clip\": [\"4\", 1]\n    },\n    \"class_type\": \"CLIPTextEncode\"\n  },\n  \"8\": {\n    \"inputs\": {\n      \"samples\": [\"3\", 0],\n      \"vae\": [\"4\", 2]\n    },\n    \"class_type\": \"VAEDecode\"\n  },\n  \"9\": {\n    \"inputs\": {\n      \"filename_prefix\": \"gravity_claw_thumb\",\n      \"images\": [\"8\", 0]\n    },\n    \"class_type\": \"SaveImage\"\n  }\n}\n",
+        "outputFormat": "png"
+      },
+      "id": "54e1cab7-895b-46d4-b6b8-a67c3e821161",
+      "name": "Generate Image (ComfyUI)",
+      "type": "n8n-nodes-comfyui.comfyui",
+      "typeVersion": 1,
+      "position": [
+        1380,
+        1560
+      ],
+      "credentials": {
+        "comfyUIApi": {
+          "id": "YbqnfbA2fymWoTNg",
+          "name": "ComfyUI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "id": "fd5d442f-8973-457b-b1f4-3a0c1e8029ce",
+      "name": "Merge Audio + Image",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1820,
+        1440
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:5055/assemble",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"image_path\": \"{{ $('Generate Image (ComfyUI)').item.json.filename }}\",\n  \"audio_path\": \"base64:voiceover_{{ $now.toMillis() }}.wav:{{ $('Download Audio File').item.binary.voiceover_audio.data }}\",\n  \"effect\": \"zoom_in\",\n  \"subtitle\": \"{{ $('Map Voice ID').item.json.script }}\",\n  \"dynamic_subtitles\": true,\n  \"bg_music_dir\": \"C:/Users/jcorc/Music\"\n}",
+        "options": {}
+      },
+      "id": "0d1fa317-cb58-4631-a967-d37d83743aed",
+      "name": "Assemble Video (Flask)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2040,
+        1440
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b0d468be-3221-4d1a-9694-811bbbd6c382",
+              "name": "updateData.id",
+              "value": "={{ $('Map Voice ID').item.json.row_id }}",
+              "type": "string"
+            },
+            {
+              "id": "89eb5b37-299f-44e2-a080-60b5cf8dc51b",
+              "name": "updateData.status",
+              "value": "Done",
+              "type": "string"
+            },
+            {
+              "id": "89eb5b37-299f-44e2-a080-60b5cf8dc51c",
+              "name": "updateData.video_url",
+              "value": "={{ $json.output_path || $json.output_file || null }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-done-data-1",
+      "name": "Map DB Fields (Done)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2240,
+        1440
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": "video_pipeline",
+        "updateKey": "id",
+        "dataPropertyName": "updateData"
+      },
+      "id": "supabase-update-2",
+      "name": "Set Done",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2440,
+        1440
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "REPLACE_WITH_YOUR_SUPABASE_CRED",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Pending Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Pending Script": {
+      "main": [
+        [
+          {
+            "node": "Row Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Row Found?": {
+      "main": [
+        [
+          {
+            "node": "Map DB Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map DB Fields": {
+      "main": [
+        [
+          {
+            "node": "Set Processing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Processing": {
+      "main": [
+        [
+          {
+            "node": "Map Voice ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Voice ID": {
+      "main": [
+        [
+          {
+            "node": "Generate TTS (AllTalk)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Image (ComfyUI)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate TTS (AllTalk)": {
+      "main": [
+        [
+          {
+            "node": "Download Audio File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Audio File": {
+      "main": [
+        [
+          {
+            "node": "Merge Audio + Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Image (ComfyUI)": {
+      "main": [
+        [
+          {
+            "node": "Merge Audio + Image",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Audio + Image": {
+      "main": [
+        [
+          {
+            "node": "Assemble Video (Flask)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assemble Video (Flask)": {
+      "main": [
+        [
+          {
+            "node": "Map DB Fields (Done)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map DB Fields (Done)": {
+      "main": [
+        [
+          {
+            "node": "Set Done",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
