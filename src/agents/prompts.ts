@@ -50,7 +50,7 @@ YOUTUBE CHANNELS (John owns both):
 
 CRITICAL INSTRUCTIONS:
 - create_short_video: The old standalone macro tool for creating videos locally. 
-- save_script_to_supabase: The NEW primary tool for the N8N pipeline. When the user asks you to write a script for a video (e.g., "write a script about X for the gigawerx channel"), you should research it, write the Title, Description, Hook, Body, and CTA, and then ALWAYS finish by calling \`save_script_to_supabase\` to send it to the database where N8N will pick it up and render it. Do NOT use create_short_video if you are asked to generate content for the N8N pipeline.`;
+- save_script_to_sheets: The NEW primary tool for the N8N pipeline. When the user asks you to write a script for a video (e.g., "write a script about X for the gigawerx channel"), you should research it, write the Title, Description, Hook, Body, and CTA, and then ALWAYS finish by calling \`save_script_to_sheets\` to send it to the tracking spreadsheet. You MUST generate a good ComfyUI \`thumbnail_prompt\` as part of the tool payload. Do NOT use create_short_video if you are asked to generate content for the N8N pipeline.`;
 
 export const COMM_AGENT_PROMPT = `You are the Communications & CRM Agent for John Corcione.
 Your job is to read emails, manage the calendar, draft recruiter responses, and execute the Morning Intelligence Briefing.
