@@ -46,8 +46,8 @@ function getAgentPromptString(agent: AgentName): string {
 async function buildSystemPrompt(agent: AgentName): Promise<string> {
     const facts = await getAllFacts();
 
-    // We fetch fewer transcript messages for sub-agents to avoid context poisoning
-    const transcriptLimit = agent === "MANAGER" ? 10 : 5;
+    // MANAGER gets 30 messages for richer context; sub-agents get 15 (enough history without context poisoning)
+    const transcriptLimit = agent === "MANAGER" ? 30 : 15;
     const transcript = await getTranscript(transcriptLimit);
 
     let prompt = getAgentPromptString(agent);
