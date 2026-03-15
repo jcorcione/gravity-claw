@@ -95,17 +95,17 @@ async function buildSystemPrompt(agent: AgentName): Promise<string> {
 
 // ─── Default Model Rotation for 429 Fallback ────────────
 const FREE_MODEL_ROTATION = [
-    "meta-llama/llama-3.3-70b-instruct",            // Groq LPU / Llama - reliable general
-    "openai/gpt-4o-mini",                           // Very strong tool calling, ultra cheap
-    "google/gemini-2.5-flash",                      // Fast agentic fallback
-    "anthropic/claude-3-haiku",                     // Fast Claude fallback
+    "openai/gpt-4o-mini",                           // Strong tool calling, cheap
+    "meta-llama/llama-3.3-70b-instruct:free",       // Free, great instruction following
+    "google/gemini-2.0-flash-exp:free",             // Free Gemini fallback
+    "anthropic/claude-3-haiku",                     // Paid Claude fallback
 ];
 
 // Router needs fast, precise instruction followers
 const ROUTER_MODEL_ROTATION = [
-    "meta-llama/llama-3.3-70b-instruct",            // Best instruction following / fastest Groq routing
     "openai/gpt-4o-mini",                           // Bulletproof JSON/Routing
-    "google/gemini-2.5-flash",                      // Lightning fast fallback
+    "meta-llama/llama-3.3-70b-instruct:free",       // Free, best instruction following
+    "google/gemini-2.0-flash-exp:free",             // Free Gemini fallback
 ];
 
 // ─── Router Logic ─────────────────────────────────────────
