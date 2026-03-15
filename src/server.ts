@@ -8,7 +8,15 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 app.use(cors());
-app.use(express.json());
+// Express 5 strict body parser — catch malformed JSON and return clean 400
+app.use((req, res, next) => {
+    express.json()(req, res, (err) => {
+        if (err) {
+            return res.status(400).json({ error: `Invalid JSON body: ${err.message}` });
+        }
+        next();
+    });
+});
 
 // ─── Dashboard API (Mission Control) ─────────────────────
 app.use("/api/dashboard", dashboardRouter);
@@ -73,6 +81,13 @@ app.post("/api/chat", async (req, res) => {
             }
         }
     }
+});
+
+// ─── Global Express 5 Error Handler ─────────────────────
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    console.error("[Express Error Handler]", err.message);
+    res.status(err.status || 500).json({ error: err.message || "Internal Server Error" });
 });
 
 app.listen(PORT, () => {
