@@ -74,9 +74,13 @@ This is the final step in the content generation loop. Once the script and thumb
                 ];
             });
 
+            // Dynamically fetch the real tab name — avoids "Sheet1" breaking on renamed tabs
+            const meta = await sheets.spreadsheets.get({ spreadsheetId });
+            const firstSheetName = meta.data.sheets?.[0]?.properties?.title ?? "Sheet1";
+
             const response = await sheets.spreadsheets.values.append({
                 spreadsheetId,
-                range: "Sheet1!A:K", // Appends to the first available row checking columns A through K
+                range: `'${firstSheetName}'!A:K`, // Appends to the first available row
                 valueInputOption: "USER_ENTERED",
                 requestBody: {
                     values
