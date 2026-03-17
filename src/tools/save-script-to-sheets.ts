@@ -1,25 +1,12 @@
-import { google } from "googleapis";
 import type { Tool } from "./index.js";
-
-// Uses the existing OAuth setup from the workspace
-function getOAuth2Client() {
-    const clientId = process.env.GOOGLE_CLIENT_ID;
-    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
-
-    if (!clientId || !clientSecret || !refreshToken) {
-        throw new Error("Missing one or more Google API credentials (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN) in environment variables.");
-    }
-
-    const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, "https://developers.google.com/oauthplayground");
-    oauth2Client.setCredentials({ refresh_token: refreshToken });
-    return oauth2Client;
-}
+import * as fs from "fs/promises";
+import * as path from "path";
+import * as os from "os";
 
 export const saveScriptToSheetsTool: Tool = {
     name: "save_script_to_sheets",
-    description: `Saves a generated video script and its metadata to the Google Sheets Video Pipeline tracker.
-This is the final step in the content generation loop. Once the script and thumbnail prompt are written, ALWAYS use this tool to save it. N8N orchestrator will automatically pick it up for rendering.`,
+    description: `Saves an array of generated video script ideas to the N8N Pipeline webhook (or locally as fallback). 
+This must be the final step after drafting ideas. ALWAYS use this tool to save scripts so the orchestrator picks them up.`,
     inputSchema: {
         type: "object",
         properties: {
@@ -29,67 +16,74 @@ This is the final step in the content generation loop. Once the script and thumb
                 items: {
                     type: "object",
                     properties: {
-                        channel: { type: "string", description: "e.g., gracenote or gigawerx" },
-                        topic: { type: "string" },
-                        title: { type: "string" },
-                        hook: { type: "string" },
-                        main_script: { type: "string" },
-                        cta: { type: "string" },
-                        thumbnail_prompt: { type: "string", description: "Detailed 1-sentence prompt for the ComfyUI thumbnail generation (e.g. 'A dark moody cross at sunset, golden hour lighting'). Do NOT include negative prompts here." }
+                        channel: { type: "string", enum: ["gracenote", "gigawerx"], description: "The channel the video is for." },
+                        title: { type: "string", description: "The SEO-optimized hook/title of the video." },
+                        script: { type: "string", description: "The exact spoken text. Under 20 seconds reading time." },
+                        thumbnail_prompt: { type: "string", description: "Detailed image generation prompt for ComfyUI." }
                     },
-                    required: ["channel", "topic", "title", "hook", "main_script", "cta", "thumbnail_prompt"]
+                    required: ["channel", "title", "script", "thumbnail_prompt"]
                 }
             }
         },
         required: ["items"]
     },
     execute: async (input) => {
-        const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
-        if (!spreadsheetId) {
-            return "Error: GOOGLE_SHEETS_SPREADSHEET_ID is not set in environment.";
+        const items = input.items as any[];
+        if (!Array.isArray(items)) {
+            return "Error: 'items' must be an array";
         }
+
+        const webhookUrl = process.env.N8N_WEBHOOK_URL;
+        const results: any[] = [];
+
+        if (webhookUrl) {
+            for (const item of items) {
+                if (!item.channel || !item.title || !item.script || !item.thumbnail_prompt) continue;
+                
+                try {
+                    const response = await fetch(webhookUrl, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ body: item })
+                    });
+                    
+                    if (!response.ok) {
+                        results.push({ item: item.title, status: "error", code: response.status });
+                    } else {
+                        results.push({ item: item.title, status: "sent" });
+                    }
+                } catch (err: any) {
+                    results.push({ item: item.title, status: "error", message: err.message });
+                }
+            }
+            const sent = results.filter(r => r.status === "sent").length;
+            const failed = results.filter(r => r.status === "error").length;
+            return JSON.stringify({ status: "webhook", sent, failed, results }, null, 2);
+        }
+
+        // Fallback: write to local JSONL file
+        const workspace = path.join(os.homedir(), ".openclaw", "workspace");
+        const outDir = path.join(workspace, "video_scripts_output");
         
         try {
-            const auth = getOAuth2Client();
-            const sheets = google.sheets({ version: "v4", auth });
-
-            const items = input.items as any[];
-            const timestamp = new Date().toISOString();
-
-            // Headers: Timestamp | Channel | Topic | Title | Hook | Script | CTA | Thumbnail Prompt | Voice | Status | Video Path
-            const values = items.map(item => {
-                const voice = item.channel === "gigawerx" ? "male_01.wav" : "female_01.wav";
-                return [
-                    timestamp,
-                    item.channel,
-                    item.topic,
-                    item.title,
-                    item.hook,
-                    item.main_script,
-                    item.cta,
-                    item.thumbnail_prompt,
-                    voice,
-                    "Pending",
-                    "" // Video Path will be filled by N8N
-                ];
-            });
-
-            // Dynamically fetch the real tab name — avoids "Sheet1" breaking on renamed tabs
-            const meta = await sheets.spreadsheets.get({ spreadsheetId });
-            const firstSheetName = meta.data.sheets?.[0]?.properties?.title ?? "Sheet1";
-
-            const response = await sheets.spreadsheets.values.append({
-                spreadsheetId,
-                range: `'${firstSheetName}'!A:K`, // Appends to the first available row
-                valueInputOption: "USER_ENTERED",
-                requestBody: {
-                    values
-                }
-            });
-            
-            return `✅ Successfully saved ${items.length} video script(s) directly to Google Sheets! Pipeline Row Updated: ${response.data.updates?.updatedRange}. Status set to 'Pending' for N8N rendering.`;
-        } catch (error: any) {
-            return `Error saving to Google Sheets: ${error.message}`;
+            await fs.mkdir(outDir, { recursive: true });
+        } catch (err) {
+            // ignore
+        }
+        
+        const outFile = path.join(outDir, "scripts.jsonl");
+        let count = 0;
+        
+        try {
+            for (const item of items) {
+                if (!item.channel || !item.title || !item.script || !item.thumbnail_prompt) continue;
+                item.saved_at = new Date().toISOString() + "Z";
+                await fs.appendFile(outFile, JSON.stringify(item) + "\n", "utf8");
+                count++;
+            }
+            return JSON.stringify({ status: "ok", saved: count, file: outFile }, null, 2);
+        } catch (err: any) {
+            return `Error: File write failed: ${err.message}`;
         }
     }
 };
