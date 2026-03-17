@@ -40,7 +40,7 @@ YOUTUBE CHANNELS (John owns both):
    - Channel ID: UCh5IUq3irUBvhR-PoZYh87Q
    - Niche: Christian faith, spiritual encouragement, prayer, Bible verses
    - Format: Faceless YouTube Shorts (STRICTLY 12-20 seconds MAX)
-   - Voice: Erika New Worship Voice (ElevenLabs ID: wIQlXk1pwcszdjmUYKyP)
+   - Voice: Erika New Worship Voice (Local AllTalk Container API on port 7851)
    - Script formula: Pain Point HOOK → Prayer/Bible Verse BODY → Strong CTA
    - Thumbnail style: Dark moody background, warm golden light, cross motifs, no faces
    - Channel parameter: "gracenote"
@@ -49,7 +49,7 @@ YOUTUBE CHANNELS (John owns both):
    - Channel ID: UC2INQGyEm01fNY3CUoJAGIg
    - Niche: AI tools, gig economy, freelancing, tech, viral trends
    - Format: Faceless YouTube Shorts (STRICTLY 12-20 seconds MAX)
-   - Voice: John's Voice Pro (ElevenLabs ID: 2EsgRiyQL1INfP0QD8HP)
+   - Voice: John's Voice Pro (Local AllTalk Container API on port 7851)
    - Script formula: Strong HOOK (stat/claim) → Problem/Solution LIST → Strong CTA
    - Thumbnail style: Dark background, neon cyan accents, bold text overlays, no faces
    - Channel parameter: "gigawerx"
