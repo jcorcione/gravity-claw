@@ -96,7 +96,7 @@ async function buildSystemPrompt(agent: AgentName): Promise<string> {
 // ─── Default Model Rotation for 429 Fallback ────────────
 const FREE_MODEL_ROTATION = [
     "meta-llama/llama-3.3-70b-instruct:free",       // FREE — #1 free tool-calling model
-    "deepseek/deepseek-chat-v3-0324:free",          // FREE — DeepSeek V3, matches Llama quality
+    "google/gemma-3-27b-it:free",                   // FREE — Excellent free alternative
     "openai/gpt-4o-mini",                           // PAID — $0.15/1M, best cheap paid option
     "anthropic/claude-3-haiku",                     // PAID — last resort
 ];
@@ -104,7 +104,7 @@ const FREE_MODEL_ROTATION = [
 // Router needs fast, precise instruction followers
 const ROUTER_MODEL_ROTATION = [
     "meta-llama/llama-3.3-70b-instruct:free",       // FREE — fast, precise routing
-    "deepseek/deepseek-chat-v3-0324:free",          // FREE — DeepSeek V3 fallback
+    "google/gemma-3-27b-it:free",                   // FREE — fast fallback routing
     "openai/gpt-4o-mini",                           // PAID — bulletproof routing fallback
 ];
 
