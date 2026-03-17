@@ -9,7 +9,12 @@ export const checkOpenRouterBalanceTool: Tool = {
         "Fetches the remaining credit balance for the OpenRouter API account. Use this to monitor usage and alert the user if funds are running low (e.g. under $5.00).",
     inputSchema: {
         type: "object",
-        properties: {}, // No inputs required
+        properties: {
+            dummy: {
+                type: "boolean",
+                description: "Not used"
+            }
+        },
     },
     execute: async () => {
         if (!config.openRouterApiKey) {
