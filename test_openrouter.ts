@@ -10,9 +10,9 @@ const client = new OpenAI({
 
 const models = [
     "openai/gpt-4o-mini",
-    "google/gemini-flash-1.5",
-    "meta-llama/llama-3.3-70b-instruct:free",
-    "google/gemini-2.0-flash-exp:free"
+    "google/gemini-2.0-flash-lite-preview-02-05:free",
+    "meta-llama/llama-3.1-8b-instruct:free",
+    "deepseek/deepseek-r1-distill-llama-70b:free"
 ];
 
 for (const model of models) {

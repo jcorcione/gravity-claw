@@ -29,7 +29,31 @@ export async function runAgentLoop(userMessage: string, userId: string = "defaul
         let escalationTriggered = false;
 
         for (let iteration = 0; iteration < config.maxAgentIterations; iteration++) {
-            const response = await chat(messages, agentTools, targetAgent);
+            let response;
+            try {
+                response = await chat(messages, agentTools, targetAgent);
+            } catch (err: any) {
+                console.error(`\n  🚨 [Self-Healing] LLM Provider crash intercepted: ${err.message}`);
+                
+                try {
+                    // Fall back to a plain MANAGER response with NO tools
+                    const fallbackMsg = "Apologize briefly, explaining that the upstream AI provider rejected the background tool schema (HTTP 400) and ask them to try rephrasing their request.";
+                    const fallbackResponse = await chat(
+                        [{ role: "user", content: fallbackMsg }],
+                        [], // Strip all tools to guarantee it bypasses strict JSON schema validators
+                        "MANAGER"
+                    );
+                    const fallbackText = fallbackResponse.choices[0]?.message?.content || "⚠️ The upstream AI provider rejected my tool request. Let's try again.";
+                    
+                    if (!skipMemory) {
+                        await saveMessage("assistant", fallbackText, userId);
+                    }
+                    return fallbackText;
+                } catch (fatalErr) {
+                    return "⚠️ Critical structural failure: All upstream AI providers are currently completely down or rejecting requests.";
+                }
+            }
+
             const choice = response.choices[0];
 
             if (!choice) {
