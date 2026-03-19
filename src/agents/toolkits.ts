@@ -24,17 +24,19 @@ export function getAgentTools(agent: AgentName): Tool[] {
 
         case "VIDEO_CONTENT":
             return getToolsByName([
-                "create_short_video",
-                "youtube_script_generator",
-                "youtube_analytics",
-                "supabase_content",
-                "comfyui_generate",
-                "elevenlabs_audio",
-                "edge_tts",
-                "video_assemble",
-                "video_compile",
-                "r2_upload",
-                "youtube_upload"
+                // ── N8N Pipeline (the ONLY video creation path) ──────────────
+                "save_script_to_sheets",    // POSTs to N8N webhook → AllTalk + ComfyUI + Flask
+
+                // ── Script & Research ─────────────────────────────────────────
+                "youtube_script_generator", // Generates script + thumbnail prompt
+                "search_web",               // Trend research for content calendar
+                "youtube_analytics",        // Channel performance lookup
+
+                // ── Legacy / Reference Only ───────────────────────────────────
+                // create_short_video, elevenlabs_audio, comfyui_generate,
+                // video_assemble, video_compile are DISABLED — they bypass N8N
+                // and try to run the pipeline directly from Railway, which fails
+                // because ComfyUI/AllTalk/Flask only run on the local desktop.
             ]);
 
         case "COMM":

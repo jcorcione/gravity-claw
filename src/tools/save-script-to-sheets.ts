@@ -41,10 +41,17 @@ This must be the final step after drafting ideas. ALWAYS use this tool to save s
                 if (!item.channel || !item.title || !item.script || !item.thumbnail_prompt) continue;
                 
                 try {
+                    // Build the webhook payload matching N8N Extract Payload field names:
+                    // $json.body.script, $json.body.channel, $json.body.image_prompts (array)
+                    const webhookPayload = {
+                        script: item.script,
+                        channel: item.channel,
+                        image_prompts: [item.thumbnail_prompt],   // N8N reads image_prompts[0] for ComfyUI
+                    };
                     const response = await fetch(webhookUrl, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ body: item })
+                        body: JSON.stringify({ body: webhookPayload })
                     });
                     
                     if (!response.ok) {
