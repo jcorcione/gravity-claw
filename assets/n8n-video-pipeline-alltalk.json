@@ -108,11 +108,11 @@
         "specifyBody": "json",
         "jsonBody": "={\n  \"text\": \"{{ $('Map Voice ID').item.json.script.replace(/\"/g, '\\\\\"') }}\",\n  \"voice\": \"{{ $('Map Voice ID').item.json.alltalk_voice }}\",\n  \"language\": \"en\",\n  \"temperature\": 0.7,\n  \"repetition_penalty\": 1.0,\n  \"output_file\": \"outputs/n8n_generated_{{ $now.toMillis() }}.wav\"\n}",
         "options": {
+          "response": {
             "response": {
-                "response": {
-                    "responseFormat": "json"
-                }
+              "responseFormat": "json"
             }
+          }
         }
       },
       "id": "el1alltalk-tts-node",
@@ -123,35 +123,23 @@
     },
     {
       "parameters": {
-        "method": "GET",
-        "url": "=http://host.docker.internal:7851{{ $json.data.audio_path.replace('outputs', '/audio') }}",
-        "options": {
-          "response": {
-            "response": {
-              "responseFormat": "file",
-              "outputPropertyName": "voiceover_audio"
+        "assignments": {
+          "assignments": [
+            {
+              "id": "au1audiourl",
+              "name": "audio_url",
+              "value": "=http://127.0.0.1:7851{{ $json.data.audio_path.replace('outputs', '/audio') }}",
+              "type": "string"
             }
-          }
-        }
-      },
-      "id": "dl1download-alltalk",
-      "name": "Download Audio File",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [1800, 1520]
-    },
-    {
-      "parameters": {
-        "operation": "write",
-        "fileName": "=/home/node/.n8n/voiceover_{{ $now.toMillis() }}.wav",
-        "dataPropertyName": "voiceover_audio",
+          ]
+        },
         "options": {}
       },
-      "id": "wb1writebinary-audio",
-      "name": "Save Audio to Disk",
-      "type": "n8n-nodes-base.writeBinaryFile",
-      "typeVersion": 1,
-      "position": [2000, 1520]
+      "id": "au2set-audio-url",
+      "name": "Build Audio URL",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1800, 1520]
     },
     {
       "parameters": {
@@ -188,7 +176,7 @@
         "url": "http://host.docker.internal:5055/assemble",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"image_path\": \"{{ $('Generate Image (ComfyUI)').item.json.filename }}\",\n  \"audio_path\": \"base64:voiceover_{{ $now.toMillis() }}.wav:{{ $('Download Audio File').item.binary.voiceover_audio.data }}\",\n  \"effect\": \"zoom_in\",\n  \"subtitle\": \"{{ $('Map Voice ID').item.json.script }}\",\n  \"dynamic_subtitles\": true,\n  \"bg_music_dir\": \"C:/Users/jcorc/Music\"\n}",
+        "jsonBody": "={\n  \"image_path\": \"{{ $('Generate Image (ComfyUI)').item.json.filename }}\",\n  \"audio_path\": \"{{ $('Build Audio URL').item.json.audio_url }}\",\n  \"effect\": \"zoom_in\",\n  \"subtitle\": \"{{ $('Map Voice ID').item.json.script }}\",\n  \"dynamic_subtitles\": false,\n  \"bg_music_dir\": \"C:/Users/jcorc/Music\"\n}",
         "options": {}
       },
       "id": "0d1fa317-cb58-4631-a967-d37d83743aed",
@@ -214,9 +202,9 @@
       ]
     },
     "Generate TTS (AllTalk)": {
-      "main": [[{ "node": "Download Audio File", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Build Audio URL", "type": "main", "index": 0 }]]
     },
-    "Download Audio File": {
+    "Build Audio URL": {
       "main": [[{ "node": "Merge Audio + Image", "type": "main", "index": 0 }]]
     },
     "Generate Image (ComfyUI)": {
