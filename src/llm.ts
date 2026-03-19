@@ -47,8 +47,9 @@ function getAgentPromptString(agent: AgentName): string {
 async function buildSystemPrompt(agent: AgentName): Promise<string> {
     const facts = await getAllFacts();
 
-    // MANAGER gets 30 messages for richer context; sub-agents get 15 (enough history without context poisoning)
-    const transcriptLimit = agent === "MANAGER" ? 30 : 15;
+    // MANAGER gets 50 messages for rich history; sub-agents get 40.
+    // 15 was too small as it was easily exhausted by tool call 'noise' (Assistant (Tool Call) + Tool result).
+    const transcriptLimit = agent === "MANAGER" ? 50 : 40;
     const transcript = await getTranscript(transcriptLimit);
 
     let prompt = getAgentPromptString(agent);
@@ -80,6 +81,9 @@ async function buildSystemPrompt(agent: AgentName): Promise<string> {
         // Just show the raw conversation flow.
         const filteredTranscript = transcript.filter(m => {
             if (agent !== "MANAGER" && m.role === "tool") return false;
+            // Also filter out the "(Tool Call)" dummy messages we save in agent.ts
+            // These eat up the 40-message window without providing content.
+            if (m.role === "assistant" && m.content === "(Tool Call)") return false;
             return true;
         });
 
@@ -107,11 +111,13 @@ function getFreeRotation(): string[] {
     return [...freeModels, "openai/gpt-4o-mini", "anthropic/claude-3-haiku"];
 }
 
-// Router needs fast, precise instruction followers — keep these hardcoded and minimal
+// Router needs fast, precise instruction followers.
+// Use 70B models for routing logic to ensure complex intents are caught.
 const ROUTER_MODEL_ROTATION = [
-    "meta-llama/llama-4-scout:free",                // FREE — fast, precise routing
-    "google/gemma-3-27b-it:free",                   // FREE — fast fallback routing
-    "openai/gpt-4o-mini",                           // PAID — bulletproof routing fallback
+    "meta-llama/llama-3.3-70b-instruct:free",       // FREE — Very precise routing
+    "google/gemma-3-27b-it:free",                   // FREE — Fast fallback
+    "anthropic/claude-3.5-sonnet",                  // PAID — Bulletproof routing/memory
+    "openai/gpt-4o-mini",                           // PAID — Fast, cheap fallback
 ];
 
 // ─── Router Logic ─────────────────────────────────────────
