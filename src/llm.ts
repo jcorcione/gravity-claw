@@ -94,17 +94,22 @@ async function buildSystemPrompt(agent: AgentName): Promise<string> {
     return prompt;
 }
 
-// ─── Default Model Rotation for 429 Fallback ────────────
-const FREE_MODEL_ROTATION = [
-    "meta-llama/llama-3.3-70b-instruct:free",       // FREE — #1 free tool-calling model
-    "google/gemma-3-27b-it:free",                   // FREE — Excellent free alternative
-    "openai/gpt-4o-mini",                           // PAID — $0.15/1M, best cheap paid option
-    "anthropic/claude-3-haiku",                     // PAID — last resort
-];
+// ─── Model Rotation ─────────────────────────────────────
+// Pull free fallback models dynamically from the registry so models.ts is the
+// single source of truth. Hardcoded stale model IDs were causing daily 400/404s.
+import { getAllModels } from "./models.js";
 
-// Router needs fast, precise instruction followers
+function getFreeRotation(): string[] {
+    const freeModels = getAllModels()
+        .filter(m => m.free && m.modelId !== "openrouter/auto")
+        .map(m => m.modelId);
+    // Always end with a reliable paid fallback
+    return [...freeModels, "openai/gpt-4o-mini", "anthropic/claude-3-haiku"];
+}
+
+// Router needs fast, precise instruction followers — keep these hardcoded and minimal
 const ROUTER_MODEL_ROTATION = [
-    "meta-llama/llama-3.3-70b-instruct:free",       // FREE — fast, precise routing
+    "meta-llama/llama-4-scout:free",                // FREE — fast, precise routing
     "google/gemma-3-27b-it:free",                   // FREE — fast fallback routing
     "openai/gpt-4o-mini",                           // PAID — bulletproof routing fallback
 ];
@@ -196,9 +201,10 @@ export async function chat(
     ];
 
     const primary = getActiveModel();
+    const rotation = getFreeRotation();
     const modelsToTry = [
         primary.modelId,
-        ...FREE_MODEL_ROTATION.filter(m => m !== primary.modelId),
+        ...rotation.filter(m => m !== primary.modelId),
     ];
 
     let lastError: Error | null = null;
@@ -220,7 +226,9 @@ export async function chat(
         } catch (err: any) {
             const status = err?.status ?? err?.response?.status;
             if (status === 429 || status === 451 || status === 404 || status === 400 || status === 502) {
-                console.warn(`  ⚠️ Model ${modelId} failed (${status}), rotating...`);
+                // Log the actual error body so we can see WHY it rejected (not just the status code)
+                const detail = err?.error?.message ?? err?.message ?? "(no detail)";
+                console.warn(`  ⚠️ Model ${modelId} failed (${status}): ${detail}`);
                 lastError = err;
                 await new Promise(r => setTimeout(r, 500));
                 continue;
