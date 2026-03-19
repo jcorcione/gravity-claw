@@ -27,6 +27,7 @@ const client = new OpenAI({
     apiKey: config.openRouterApiKey,
     defaultHeaders: {
         "X-Title": "AgenticHQ",
+        "HTTP-Referer": "https://gravity-claw-production-d161.up.railway.app",
     },
 });
 
