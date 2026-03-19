@@ -41,9 +41,17 @@ export function getAgentTools(agent: AgentName): Tool[] {
 
         case "COMM":
             return [
-                ...getToolsByName(["scan_recruiter_emails", "search_calendar", "manage_calendar", "search_web"]),
+                // ── Native tools (always reliable on Railway) ────────────────
+                ...getToolsByName([
+                    "read_gmail",           // PRIMARY Gmail reader — native OAuth2, no MCP needed
+                    "scan_recruiter_emails",
+                    "search_calendar",
+                    "manage_calendar",
+                    "search_web",
+                ]),
+                // ── MCP tools (supplementary — only available if MCP server starts) ──
                 ...getMcpToolsByPrefix("mcp_gmail_"),
-                ...getMcpToolsByPrefix("mcp_tavily_")
+                ...getMcpToolsByPrefix("mcp_tavily_"),
             ];
 
         case "SEO_BLOG":
