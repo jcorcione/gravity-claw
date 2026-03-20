@@ -26,9 +26,9 @@
               "type": "string"
             },
             {
-              "id": "e5f6g7h8",
-              "name": "voice",
-              "value": "={{ $json.body.voice }}",
+              "id": "ch1channel",
+              "name": "channel",
+              "value": "={{ $json.body.channel }}",
               "type": "string"
             },
             {
@@ -36,12 +36,6 @@
               "name": "image_prompts",
               "value": "={{ $json.body.image_prompts }}",
               "type": "array"
-            },
-            {
-              "id": "ch1channel",
-              "name": "channel",
-              "value": "={{ $json.body.channel }}",
-              "type": "string"
             }
           ]
         },
@@ -68,18 +62,6 @@
               "name": "script",
               "value": "={{ $json.script }}",
               "type": "string"
-            },
-            {
-              "id": "v3channel",
-              "name": "channel",
-              "value": "={{ $json.channel }}",
-              "type": "string"
-            },
-            {
-              "id": "v4imageprompts",
-              "name": "image_prompts",
-              "value": "={{ $json.image_prompts }}",
-              "type": "array"
             }
           ]
         },
@@ -94,81 +76,72 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=http://host.docker.internal:7851/api/generate",
-        "sendHeaders": true,
-        "headerParameters": {
+        "url": "http://host.docker.internal:7851/api/tts-generate",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
           "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
+            { "name": "text_input", "value": "={{ $json.script }}" },
+            { "name": "text_filtering", "value": "standard" },
+            { "name": "character_voice_gen", "value": "={{ $json.alltalk_voice }}" },
+            { "name": "narrator_enabled", "value": "false" },
+            { "name": "narrator_voice_gen", "value": "={{ $json.alltalk_voice }}" },
+            { "name": "text_not_inside", "value": "character" },
+            { "name": "language", "value": "en" },
+            { "name": "output_file_name", "value": "=n8n_gen_{{ $now.toMillis() }}" },
+            { "name": "output_file_timestamp", "value": "true" },
+            { "name": "autoplay", "value": "false" },
+            { "name": "autoplay_volume", "value": "0.8" }
           ]
         },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"text\": \"{{ $('Map Voice ID').item.json.script.replace(/\"/g, '\\\\\"') }}\",\n  \"voice\": \"{{ $('Map Voice ID').item.json.alltalk_voice }}\",\n  \"language\": \"en\",\n  \"temperature\": 0.7,\n  \"repetition_penalty\": 1.0,\n  \"output_file\": \"outputs/n8n_generated_{{ $now.toMillis() }}.wav\"\n}",
-        "options": {
-          "response": {
-            "response": {
-              "responseFormat": "json"
-            }
-          }
-        }
+        "options": {}
       },
-      "id": "el1alltalk-tts-node",
-      "name": "Generate TTS (AllTalk)",
+      "id": "el1alltalk-tts",
+      "name": "Generate AllTalk TTS",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [1600, 1520]
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "au1audiourl",
-              "name": "audio_url",
-              "value": "=http://127.0.0.1:7851{{ $json.data.audio_path.replace('outputs', '/audio') }}",
-              "type": "string"
+        "url": "={{ $json.output_file_url.replace('127.0.0.1', 'host.docker.internal') }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "voiceover_audio"
             }
-          ]
-        },
-        "options": {}
+          }
+        }
       },
-      "id": "au2set-audio-url",
-      "name": "Build Audio URL",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "id": "d1download-audio",
+      "name": "Download Audio from AllTalk",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [1800, 1520]
     },
     {
       "parameters": {
-        "workflow": "={\n  \"3\": {\n    \"inputs\": {\n      \"seed\": {{ Math.floor(Math.random() * 1000000000000) }},\n      \"steps\": 20,\n      \"cfg\": 8.0,\n      \"sampler_name\": \"euler\",\n      \"scheduler\": \"normal\",\n      \"denoise\": 1,\n      \"model\": [\"4\", 0],\n      \"positive\": [\"6\", 0],\n      \"negative\": [\"7\", 0],\n      \"latent_image\": [\"5\", 0]\n    },\n    \"class_type\": \"KSampler\"\n  },\n  \"4\": {\n    \"inputs\": {\n      \"ckpt_name\": \"realvisxlV50_v50LightningBakedvae.safetensors\"\n    },\n    \"class_type\": \"CheckpointLoaderSimple\"\n  },\n  \"5\": {\n    \"inputs\": {\n      \"width\": 1080,\n      \"height\": 1920,\n      \"batch_size\": 1\n    },\n    \"class_type\": \"EmptyLatentImage\"\n  },\n  \"6\": {\n    \"inputs\": {\n      \"text\": \"{{ $('Map Voice ID').item.json.image_prompts[0] }}\",\n      \"clip\": [\"4\", 1]\n    },\n    \"class_type\": \"CLIPTextEncode\"\n  },\n  \"7\": {\n    \"inputs\": {\n      \"text\": \"text, words, letters, typography, writing, captions, subtitles, watermark, logo, numbers, title, signs with text, faces, people, portrait, human, low quality, blurry, distorted, deformed, ugly, bad anatomy, out of frame, oversaturated, noise, grain\",\n      \"clip\": [\"4\", 1]\n    },\n    \"class_type\": \"CLIPTextEncode\"\n  },\n  \"8\": {\n    \"inputs\": {\n      \"samples\": [\"3\", 0],\n      \"vae\": [\"4\", 2]\n    },\n    \"class_type\": \"VAEDecode\"\n  },\n  \"9\": {\n    \"inputs\": {\n      \"filename_prefix\": \"gravity_claw_thumb\",\n      \"images\": [\"8\", 0]\n    },\n    \"class_type\": \"SaveImage\"\n  }\n}\n",
+        "workflow": "={\n  \"6\": {\n    \"inputs\": {\n      \"text\": \"{{ $('Extract Payload').item.json.image_prompts[0] }}\",\n      \"clip\": [\"4\", 1]\n    },\n    \"class_type\": \"CLIPTextEncode\"\n  },\n  \"3\": {\n    \"inputs\": {\n      \"seed\": {{ Math.floor(Math.random() * 1000000) }},\n      \"steps\": 20,\n      \"cfg\": 8.0,\n      \"sampler_name\": \"euler\",\n      \"scheduler\": \"normal\",\n      \"denoise\": 1,\n      \"model\": [\"4\", 0],\n      \"positive\": [\"6\", 0],\n      \"negative\": [\"7\", 0],\n      \"latent_image\": [\"5\", 0]\n    },\n    \"class_type\": \"KSampler\"\n  },\n  \"4\": {\n    \"inputs\": { \"ckpt_name\": \"realvisxlV50_v50LightningBakedvae.safetensors\" },\n    \"class_type\": \"CheckpointLoaderSimple\"\n  },\n  \"5\": {\n    \"inputs\": { \"width\": 1080, \"height\": 1920, \"batch_size\": 1 },\n    \"class_type\": \"EmptyLatentImage\"\n  },\n  \"7\": {\n    \"inputs\": { \"text\": \"ugly, blurry, low quality, distorted, text, watermark, people, faces, human, man, woman\", \"clip\": [\"4\", 1] },\n    \"class_type\": \"CLIPTextEncode\"\n  },\n  \"8\": { \"inputs\": { \"samples\": [\"3\", 0], \"vae\": [\"4\", 2] }, \"class_type\": \"VAEDecode\" },\n  \"9\": { \"inputs\": { \"filename_prefix\": \"grace_note\", \"images\": [\"8\", 0] }, \"class_type\": \"SaveImage\" }\n}",
         "outputFormat": "png"
       },
-      "id": "54e1cab7-895b-46d4-b6b8-a67c3e821161",
+      "id": "c1comfy-ui-node",
       "name": "Generate Image (ComfyUI)",
       "type": "n8n-nodes-comfyui.comfyui",
       "typeVersion": 1,
       "position": [1600, 1776],
-      "credentials": {
-        "comfyUIApi": {
-          "id": "YbqnfbA2fymWoTNg",
-          "name": "ComfyUI account"
-        }
-      }
+      "credentials": { "comfyUIApi": { "id": "YbqnfbA2fymWoTNg", "name": "ComfyUI account" } }
     },
     {
       "parameters": {
         "mode": "combine",
-        "combineBy": "combineAll",
-        "options": {}
+        "combineBy": "combineAll"
       },
-      "id": "fd5d442f-8973-457b-b1f4-3a0c1e8029ce",
+      "id": "m1merge-node",
       "name": "Merge Audio + Image",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3,
-      "position": [2200, 1648]
+      "position": [2050, 1648]
     },
     {
       "parameters": {
@@ -176,47 +149,22 @@
         "url": "http://host.docker.internal:5055/assemble",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"image_path\": \"{{ $('Generate Image (ComfyUI)').item.json.filename }}\",\n  \"audio_path\": \"{{ $('Build Audio URL').item.json.audio_url }}\",\n  \"effect\": \"zoom_in\",\n  \"subtitle\": \"{{ $('Map Voice ID').item.json.script }}\",\n  \"dynamic_subtitles\": false,\n  \"bg_music_dir\": \"C:/Users/jcorc/Music\"\n}",
-        "options": {}
+        "jsonBody": "={\n  \"image_path\": \"{{ $('Generate Image (ComfyUI)').item.json.filename }}\",\n  \"audio_path\": \"base64:voiceover_{{ $now.toMillis() }}.wav:{{ $binary.voiceover_audio.data }}\",\n  \"effect\": \"zoom_in\",\n  \"subtitle\": \"{{ $('Extract Payload').item.json.script }}\",\n  \"dynamic_subtitles\": false,\n  \"bg_music_dir\": \"C:/Users/jcorc/Music\"\n}"
       },
-      "id": "0d1fa317-cb58-4631-a967-d37d83743aed",
+      "id": "f1flask-assemble",
       "name": "Assemble Video (Flask)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [2400, 1648]
+      "position": [2250, 1648]
     }
   ],
   "connections": {
-    "Webhook Trigger": {
-      "main": [[{ "node": "Extract Payload", "type": "main", "index": 0 }]]
-    },
-    "Extract Payload": {
-      "main": [[{ "node": "Map Voice ID", "type": "main", "index": 0 }]]
-    },
-    "Map Voice ID": {
-      "main": [
-        [
-          { "node": "Generate TTS (AllTalk)", "type": "main", "index": 0 },
-          { "node": "Generate Image (ComfyUI)", "type": "main", "index": 0 }
-        ]
-      ]
-    },
-    "Generate TTS (AllTalk)": {
-      "main": [[{ "node": "Build Audio URL", "type": "main", "index": 0 }]]
-    },
-    "Build Audio URL": {
-      "main": [[{ "node": "Merge Audio + Image", "type": "main", "index": 0 }]]
-    },
-    "Generate Image (ComfyUI)": {
-      "main": [[{ "node": "Merge Audio + Image", "type": "main", "index": 1 }]]
-    },
-    "Merge Audio + Image": {
-      "main": [[{ "node": "Assemble Video (Flask)", "type": "main", "index": 0 }]]
-    }
-  },
-  "pinData": {},
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "83ecaed23d9adc60dff1230fca6a92396494b370af7cf4755373724bb06a75ce"
+    "Webhook Trigger": { "main": [[{ "node": "Extract Payload", "type": "main", "index": 0 }]] },
+    "Extract Payload": { "main": [[{ "node": "Map Voice ID", "type": "main", "index": 0 }]] },
+    "Map Voice ID": { "main": [[{ "node": "Generate AllTalk TTS", "type": "main", "index": 0 }, { "node": "Generate Image (ComfyUI)", "type": "main", "index": 0 }]] },
+    "Generate AllTalk TTS": { "main": [[{ "node": "Download Audio from AllTalk", "type": "main", "index": 0 }]] },
+    "Download Audio from AllTalk": { "main": [[{ "node": "Merge Audio + Image", "type": "main", "index": 0 }]] },
+    "Generate Image (ComfyUI)": { "main": [[{ "node": "Merge Audio + Image", "type": "main", "index": 1 }]] },
+    "Merge Audio + Image": { "main": [[{ "node": "Assemble Video (Flask)", "type": "main", "index": 0 }]] }
   }
 }
