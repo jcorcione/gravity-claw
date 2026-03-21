@@ -27,6 +27,7 @@ export async function runAgentLoop(userMessage: string, userId: string = "defaul
         const agentTools = getAgentTools(targetAgent);
 
         let escalationTriggered = false;
+        let recentFailedTools: string[] = [];
 
         for (let iteration = 0; iteration < config.maxAgentIterations; iteration++) {
             let response;
@@ -115,6 +116,10 @@ export async function runAgentLoop(userMessage: string, userId: string = "defaul
                         tool_call_id: call.id,
                         content: result,
                     });
+                    
+                    // Reset consecutive failures on success
+                    recentFailedTools = [];
+
                 } catch (err) {
                     if (err && typeof err === 'object' && 'name' in err && err.name === 'EscalationError') {
                         console.log(`\n  🚀 ESCALATION TRIGGERED: ${(err as EscalationError).reason}`);
@@ -132,6 +137,19 @@ export async function runAgentLoop(userMessage: string, userId: string = "defaul
                         tool_call_id: call.id,
                         content: JSON.stringify({ error: errorMessage }),
                     });
+                    
+                    // Track tool failures
+                    recentFailedTools.push(toolName);
+                    
+                    // Circuit breaker: 2 consecutive failures of the SAME tool
+                    if (recentFailedTools.length >= 2 && recentFailedTools.every(name => name === toolName)) {
+                        console.warn(`\n  ⚠️ [Circuit Breaker] Tool ${toolName} failed consecutively. Breaking loop to protect system.`);
+                        const breakingMsg = `⚠️ The tool '${toolName}' failed multiple times in a row. I have stopped to prevent an infinite loop. Here is what happened: ${errorMessage}`;
+                        if (!skipMemory) {
+                            await saveMessage("assistant", breakingMsg, userId);
+                        }
+                        return breakingMsg;
+                    }
                 }
             }
 

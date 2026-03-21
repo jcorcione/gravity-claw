@@ -134,6 +134,24 @@
     },
     {
       "parameters": {
+        "url": "http://host.docker.internal:8188/view?filename={{ $json.filename }}&type=output",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "comfyui_image"
+            }
+          }
+        }
+      },
+      "id": "d2download-image",
+      "name": "Download Image from ComfyUI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1800, 1776]
+    },
+    {
+      "parameters": {
         "mode": "combine",
         "combineBy": "combineAll"
       },
@@ -149,7 +167,7 @@
         "url": "http://host.docker.internal:5055/assemble",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"image_path\": \"{{ $('Generate Image (ComfyUI)').item.json.filename }}\",\n  \"audio_path\": \"base64:voiceover_{{ $now.toMillis() }}.wav:{{ $binary.voiceover_audio.data }}\",\n  \"effect\": \"zoom_in\",\n  \"subtitle\": \"{{ $('Extract Payload').item.json.script }}\",\n  \"dynamic_subtitles\": false,\n  \"bg_music_dir\": \"C:/Users/jcorc/Music\"\n}"
+        "jsonBody": "={\n  \"image_path\": \"base64:{{ $('Generate Image (ComfyUI)').item.json.filename }}:{{ $binary.comfyui_image.data }}\",\n  \"audio_path\": \"base64:voiceover_{{ $now.toMillis() }}.wav:{{ $binary.voiceover_audio.data }}\",\n  \"effect\": \"zoom_in\",\n  \"subtitle\": \"{{ $('Extract Payload').item.json.script }}\",\n  \"dynamic_subtitles\": false,\n  \"bg_music_dir\": \"C:/Users/jcorc/Music\"\n}"
       },
       "id": "f1flask-assemble",
       "name": "Assemble Video (Flask)",
@@ -164,7 +182,8 @@
     "Map Voice ID": { "main": [[{ "node": "Generate AllTalk TTS", "type": "main", "index": 0 }, { "node": "Generate Image (ComfyUI)", "type": "main", "index": 0 }]] },
     "Generate AllTalk TTS": { "main": [[{ "node": "Download Audio from AllTalk", "type": "main", "index": 0 }]] },
     "Download Audio from AllTalk": { "main": [[{ "node": "Merge Audio + Image", "type": "main", "index": 0 }]] },
-    "Generate Image (ComfyUI)": { "main": [[{ "node": "Merge Audio + Image", "type": "main", "index": 1 }]] },
+    "Generate Image (ComfyUI)": { "main": [[{ "node": "Download Image from ComfyUI", "type": "main", "index": 0 }]] },
+    "Download Image from ComfyUI": { "main": [[{ "node": "Merge Audio + Image", "type": "main", "index": 1 }]] },
     "Merge Audio + Image": { "main": [[{ "node": "Assemble Video (Flask)", "type": "main", "index": 0 }]] }
   }
 }
