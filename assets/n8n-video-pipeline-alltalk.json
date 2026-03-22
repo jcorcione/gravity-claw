@@ -4,8 +4,7 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "video-generator",
-        "responseMode": "lastNode",
-        "responseData": "allEntries",
+        "responseMode": "onReceived",
         "options": {}
       },
       "id": "ae3fa3d2-fc82-451f-b2a0-ac7143542033",
