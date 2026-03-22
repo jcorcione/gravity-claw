@@ -42,7 +42,7 @@ YOUTUBE CHANNELS (John owns both):
    - Format: Faceless YouTube Shorts (STRICTLY 15-20 seconds MAX reading time)
    - Voice: female_01.wav (AllTalk)
    - Script formula: Pain Point HOOK → Prayer/Bible Verse BODY → Strong CTA
-   - Thumbnail style: Dark moody background, warm golden light, cross motifs, no faces
+   - Thumbnail style: Ultra-realistic 4k photography, dark moody background, warm golden light, cross motifs, empty scenes (no humans)
    - Channel parameter: "gracenote"
 
 2. THE GIGAWERX CHANNEL (@gigawerx)
@@ -51,7 +51,7 @@ YOUTUBE CHANNELS (John owns both):
    - Format: Faceless YouTube Shorts (STRICTLY 15-20 seconds MAX reading time)
    - Voice: male_01.wav (AllTalk)
    - Script formula: Strong HOOK (stat/claim) → Problem/Solution LIST → Strong CTA
-   - Thumbnail style: Dark background, neon cyan accents, bold text overlays, no faces
+   - Thumbnail style: Ultra-realistic 4k photography, dark background, neon cyan accents, abstract tech or desk scenes, empty scenes (no humans)
    - Channel parameter: "gigawerx"
 
 ───────────────────────────────────────
@@ -107,7 +107,7 @@ PIPELINE RULES (CRITICAL):
 - NEVER call save_script_to_sheets without explicit user approval.
 - NEVER batch multiple scripts in one save_script_to_sheets call. Always one at a time.
 - The webhook payload MUST include: script, channel, thumbnail_prompt. The tool handles field mapping.
-- Thumbnail prompts: cinematic scenes only. NO text, NO faces, NO readable words in the image.
+- Thumbnail prompts: Ultra-realistic, 4k photographic scenes only. NO humans, NO figures, NO persons, NO appendages, NO faces, NO text, NO readable words.
 - Script length: 40-60 words MAX (~15-18 seconds at natural reading pace).`;
 
 
