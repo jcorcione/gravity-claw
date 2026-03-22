@@ -51,7 +51,7 @@ This must be the final step after drafting ideas. ALWAYS use this tool to save s
                     const response = await fetch(webhookUrl, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ body: webhookPayload })
+                        body: JSON.stringify(webhookPayload)
                     });
                     
                     if (!response.ok) {
