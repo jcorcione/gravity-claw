@@ -130,7 +130,7 @@
         "url": "http://host.docker.internal:5055/assemble",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"image_path\": \"{{ $('Generate Image (ComfyUI)').item.json.filename }}\",\n  \"audio_path\": \"{{ $('Generate AllTalk TTS').item.json.output_file_url.replace('127.0.0.1', 'host.docker.internal') }}\",\n  \"effect\": \"zoom_in\",\n  \"subtitle\": \"{{ $('Extract Payload').item.json.script }}\",\n  \"dynamic_subtitles\": false,\n  \"bg_music_dir\": \"C:/Users/jcorc/Music\"\n}"
+        "jsonBody": "={\n  \"image_path\": {{ JSON.stringify($('Generate Image (ComfyUI)').item.json.filename) }},\n  \"audio_path\": {{ JSON.stringify($('Generate AllTalk TTS').item.json.output_file_url.replace('127.0.0.1', 'host.docker.internal')) }},\n  \"effect\": \"zoom_in\",\n  \"subtitle\": {{ JSON.stringify($('Extract Payload').item.json.script) }},\n  \"dynamic_subtitles\": false,\n  \"bg_music_dir\": \"C:/Users/jcorc/Music\"\n}"
       },
       "id": "f1flask-assemble",
       "name": "Assemble Video (Flask)",
