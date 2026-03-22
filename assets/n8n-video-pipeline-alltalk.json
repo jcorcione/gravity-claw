@@ -103,24 +103,6 @@
     },
     {
       "parameters": {
-        "url": "={{ $json.output_file_url.replace('127.0.0.1', 'host.docker.internal') }}",
-        "options": {
-          "response": {
-            "response": {
-              "responseFormat": "file",
-              "outputPropertyName": "voiceover_audio"
-            }
-          }
-        }
-      },
-      "id": "d1download-audio",
-      "name": "Download Audio from AllTalk",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [1800, 1520]
-    },
-    {
-      "parameters": {
         "workflow": "={\n  \"6\": {\n    \"inputs\": {\n      \"text\": \"{{ $('Extract Payload').item.json.image_prompts[0] }}\",\n      \"clip\": [\"4\", 1]\n    },\n    \"class_type\": \"CLIPTextEncode\"\n  },\n  \"3\": {\n    \"inputs\": {\n      \"seed\": {{ Math.floor(Math.random() * 1000000) }},\n      \"steps\": 20,\n      \"cfg\": 8.0,\n      \"sampler_name\": \"euler\",\n      \"scheduler\": \"normal\",\n      \"denoise\": 1,\n      \"model\": [\"4\", 0],\n      \"positive\": [\"6\", 0],\n      \"negative\": [\"7\", 0],\n      \"latent_image\": [\"5\", 0]\n    },\n    \"class_type\": \"KSampler\"\n  },\n  \"4\": {\n    \"inputs\": { \"ckpt_name\": \"realvisxlV50_v50LightningBakedvae.safetensors\" },\n    \"class_type\": \"CheckpointLoaderSimple\"\n  },\n  \"5\": {\n    \"inputs\": { \"width\": 1080, \"height\": 1920, \"batch_size\": 1 },\n    \"class_type\": \"EmptyLatentImage\"\n  },\n  \"7\": {\n    \"inputs\": { \"text\": \"ugly, blurry, low quality, distorted, text, watermark, people, faces, human, man, woman\", \"clip\": [\"4\", 1] },\n    \"class_type\": \"CLIPTextEncode\"\n  },\n  \"8\": { \"inputs\": { \"samples\": [\"3\", 0], \"vae\": [\"4\", 2] }, \"class_type\": \"VAEDecode\" },\n  \"9\": { \"inputs\": { \"filename_prefix\": \"grace_note\", \"images\": [\"8\", 0] }, \"class_type\": \"SaveImage\" }\n}",
         "outputFormat": "png"
       },
@@ -133,32 +115,14 @@
     },
     {
       "parameters": {
-        "url": "http://host.docker.internal:8188/view?filename={{ $json.filename }}&type=output",
-        "options": {
-          "response": {
-            "response": {
-              "responseFormat": "file",
-              "outputPropertyName": "comfyui_image"
-            }
-          }
-        }
-      },
-      "id": "d2download-image",
-      "name": "Download Image from ComfyUI",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [1800, 1776]
-    },
-    {
-      "parameters": {
         "mode": "combine",
         "combineBy": "combineAll"
       },
       "id": "m1merge-node",
-      "name": "Merge Audio + Image",
+      "name": "Merge Triggers",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3,
-      "position": [2050, 1648]
+      "position": [1900, 1648]
     },
     {
       "parameters": {
@@ -166,23 +130,21 @@
         "url": "http://host.docker.internal:5055/assemble",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"image_path\": \"base64:{{ $('Generate Image (ComfyUI)').item.json.filename }}:{{ $binary.comfyui_image.data }}\",\n  \"audio_path\": \"base64:voiceover_{{ $now.toMillis() }}.wav:{{ $binary.voiceover_audio.data }}\",\n  \"effect\": \"zoom_in\",\n  \"subtitle\": \"{{ $('Extract Payload').item.json.script }}\",\n  \"dynamic_subtitles\": false,\n  \"bg_music_dir\": \"C:/Users/jcorc/Music\"\n}"
+        "jsonBody": "={\n  \"image_path\": \"{{ $('Generate Image (ComfyUI)').item.json.filename }}\",\n  \"audio_path\": \"{{ $('Generate AllTalk TTS').item.json.output_file_url.replace('127.0.0.1', 'host.docker.internal') }}\",\n  \"effect\": \"zoom_in\",\n  \"subtitle\": \"{{ $('Extract Payload').item.json.script }}\",\n  \"dynamic_subtitles\": false,\n  \"bg_music_dir\": \"C:/Users/jcorc/Music\"\n}"
       },
       "id": "f1flask-assemble",
       "name": "Assemble Video (Flask)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [2250, 1648]
+      "position": [2150, 1648]
     }
   ],
   "connections": {
     "Webhook Trigger": { "main": [[{ "node": "Extract Payload", "type": "main", "index": 0 }]] },
     "Extract Payload": { "main": [[{ "node": "Map Voice ID", "type": "main", "index": 0 }]] },
     "Map Voice ID": { "main": [[{ "node": "Generate AllTalk TTS", "type": "main", "index": 0 }, { "node": "Generate Image (ComfyUI)", "type": "main", "index": 0 }]] },
-    "Generate AllTalk TTS": { "main": [[{ "node": "Download Audio from AllTalk", "type": "main", "index": 0 }]] },
-    "Download Audio from AllTalk": { "main": [[{ "node": "Merge Audio + Image", "type": "main", "index": 0 }]] },
-    "Generate Image (ComfyUI)": { "main": [[{ "node": "Download Image from ComfyUI", "type": "main", "index": 0 }]] },
-    "Download Image from ComfyUI": { "main": [[{ "node": "Merge Audio + Image", "type": "main", "index": 1 }]] },
-    "Merge Audio + Image": { "main": [[{ "node": "Assemble Video (Flask)", "type": "main", "index": 0 }]] }
+    "Generate AllTalk TTS": { "main": [[{ "node": "Merge Triggers", "type": "main", "index": 0 }]] },
+    "Generate Image (ComfyUI)": { "main": [[{ "node": "Merge Triggers", "type": "main", "index": 1 }]] },
+    "Merge Triggers": { "main": [[{ "node": "Assemble Video (Flask)", "type": "main", "index": 0 }]] }
   }
 }
