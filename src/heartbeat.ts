@@ -17,44 +17,50 @@ interface ActiveJob {
 const activeJobs = new Map<string, ActiveJob>();
 let botInstance: Bot | null = null;
 
-// ─── Intelligence Briefing Prompt ──────────────────────────────
+// ─── Scheduled Prompts ──────────────────────────────
 
-const BRIEFING_PROMPT = `You are running John Corcione's morning intelligence briefing. Execute the following steps and compile a clean report. Do NOT show raw JSON or tool call details — only clean formatted output.
+const RECRUITER_PROMPT = `You are running John Corcione's Recruiter Pipeline scan. 
+Run scan_recruiter_emails (max 10). Report exactly how many recruiter emails you found. If there are strong matches, draft short, professional cover letters for them.
 
-STEP 1 — RECRUITER EMAIL SCAN:
-Run scan_recruiter_emails (max 10). Report: how many emails, any recruiter contacts, any cover letters drafted.
+Format the output as:
+👔 *Recruiter Pipeline* [date]
+- [Summary of recruiter emails]
+- [List of any cover letters drafted]
 
-STEP 2 — SITE & NEWSLETTER SCAN:
-a) Search/scrape https://jcorcione.com — find the latest articles or posts on the site. Report 1-2 recent content items.
-b) Search the Gmail inbox for emails from Kim Komando (sender domain: komando.com) received in the last 24 hours. Extract and report the top 2-3 tech tips or headlines from the email body.
-c) Search the Gmail inbox for emails from Tech Brew (sender domain: techbrew.com OR morning brew) received in the last 24 hours. Extract and report the top 2-3 tech news headlines from the email body.
+Keep it tight and professional. ONLY report on job leads.`;
 
-STEP 3 — GOOGLE TRENDS FOR GIGAWERX (use Tavily MCP search tool):
-Search: "Google Trends AI tools freelancing gig economy trending topics today 2026"
-Also search: "trending tech stories site:trends.google.com OR site:techcrunch.com AI tools 2026"
-Report the 2-3 hottest trending topics relevant to AI/freelancing/tech for the Gigawerx channel.
+const INTEL_PROMPT = `You are running John Corcione's General Intel Briefing.
+1) Search/scrape https://jcorcione.com — find the latest articles or posts.
+2) Use web search to find the latest general AI news and AI freelancing trends for today.
 
-STEP 4 — GRACE NOTE TRENDS (use Tavily MCP search tool):
-Search: "trending Christian encouragement prayer faith YouTube Shorts 2026"
-Report the 2-3 most shareable faith/prayer topics trending right now.
+Format the output as:
+☀️ *General Intel Brief* [date]
+🌐 *JCorcione.com:* [latest post]
+🤖 *AI Trends:* [2-3 hot topics]
 
-STEP 5 — TODAY'S CALENDAR:
-Run search_calendar for today. Report any events or deadlines.
+Keep it concise, under 8 sentences.`;
 
-STEP 6 — COMPILE & SEND:
-Format the briefing as:
+const YOUTUBE_CALENDAR_PROMPT = `You are running John's YouTube Trends & Calendar scan.
+1) Search the web and Google Trends for "trending tech stories AI tools 2026" (for the Gigawerx channel).
+2) Search the web for "trending Christian encouragement prayer faith YouTube Shorts" (for Grace Note).
+3) Run search_calendar for today and report any events or deadlines.
 
-☀️ *Good morning John — AgenticHQ Intel Brief* [date]
+Format the output as:
+🎥 *YouTube & Calendar Brief* [date]
+⚡ *Gigawerx Hub:* [top 2 trending AI topics]
+🙏 *Grace Note:* [top 2 faith topics]
+📅 *Schedule:* [Today's events or "Clear schedule"]`;
 
-📧 *Email:* [summary or "Inbox clear"]
-🌐 *JCorcione.com:* [latest post or content]
-📰 *Kim Komando:* [top 2 tips/headlines from today's email]
-📱 *Tech Brew:* [top 2 headlines from today's email]
-⚡ *Gigawerx Trends:* [top 2-3 hot topics]
-🙏 *Grace Note Trends:* [top 2 faith topics]
-📅 *Today:* [events or "Nothing scheduled"]
+const NEWSLETTER_PROMPT = `You are running the Newsletter & Subscriptions Brief.
+Search the Gmail inbox (or designated subscriptions category/labels) for emails from "Kim Komando" (komando.com) and "Tech Brew / Morning Brew" received in the last 24 hours.
+Extract and summarize the top tech tips and headlines.
 
-Keep it tight — under 15 sentences total. Only flag what needs John's attention.`;
+Format the output as:
+📰 *Subscriptions Brief* [date]
+💡 *Komando:* [top 2 tips]
+☕ *Tech Brew:* [top 2 headlines]
+
+Keep it focused and easy to digest.`;
 
 const CHECKIN_PROMPT = `Quick check-in from AgenticHQ. Use get_current_time to get the time. Run search_semantic_memory for any pending tasks or reminders. Send a 1-2 sentence check-in only if there's something worth flagging. Otherwise stay quiet.`;
 
@@ -89,7 +95,7 @@ async function sendProactiveMessage(prompt: string, label: string): Promise<void
 // ─── Trigger Briefing Manually ───────────────────────────
 
 export async function triggerBriefing(): Promise<string> {
-    return runAgentLoop(BRIEFING_PROMPT, "default_user", true);
+    return runAgentLoop(INTEL_PROMPT, "default_user", true);
 }
 
 // ─── Schedule Management ─────────────────────────────────
@@ -105,6 +111,8 @@ function startJob(id: string, cronExpr: string, prompt: string, name: string): v
 
     const task = cron.schedule(cronExpr, () => {
         void sendProactiveMessage(prompt, name);
+    }, {
+        timezone: "America/New_York"
     });
 
     activeJobs.set(id, {
@@ -138,9 +146,11 @@ export function stopAllJobs(): void {
 export async function initHeartbeat(bot: Bot): Promise<void> {
     botInstance = bot;
 
-    // Built-in: Morning intelligence briefing (8AM ET = 13:00 UTC)
-    const morningCron = process.env["HEARTBEAT_MORNING_CRON"] ?? "0 13 * * *";
-    startJob("builtin_morning", morningCron, BRIEFING_PROMPT, "Morning Intel Brief");
+    // Built-in Schedules (Times are America/New_York)
+    startJob("builtin_recruiter", "0 8 * * *", RECRUITER_PROMPT, "Recruiter Pipeline");
+    startJob("builtin_intel", "30 8 * * *", INTEL_PROMPT, "General Intel Brief");
+    startJob("builtin_youtube_calendar", "0 9 * * *", YOUTUBE_CALENDAR_PROMPT, "YouTube & Calendar");
+    startJob("builtin_newsletter", "30 9 * * *", NEWSLETTER_PROMPT, "Newsletter Brief");
 
     // Built-in: Periodic check-in (optional, disabled by default)
     const checkinEnabled = process.env["HEARTBEAT_CHECKIN_ENABLED"] === "true";
