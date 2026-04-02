@@ -9,3 +9,11 @@ dist/
 *.db-shm
 .vercel
 gmail-token-output.txt
+
+# Scratch and testing dumps
+out.txt
+messages_dump_new.txt
+messages_dup_check.txt
+metaclaw_inspect/
+alltalk_openapi.json
+test_alltalk.ts

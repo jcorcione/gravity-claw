@@ -23,62 +23,54 @@ export function getAgentTools(agent: AgentName): Tool[] {
             ]);
 
         case "VIDEO_CONTENT":
-            return getToolsByName([
-                // ── N8N Pipeline (the ONLY video creation path) ──────────────
-                "save_script_to_sheets",    // POSTs to N8N webhook → AllTalk + ComfyUI + Flask
-
-                // ── Script & Research ─────────────────────────────────────────
-                "youtube_script_generator", // Generates script + thumbnail prompt
-                "search_web",               // Trend research for content calendar
-                "youtube_analytics",        // Channel performance lookup
-
-                // ── Legacy / Reference Only ───────────────────────────────────
-                // create_short_video, elevenlabs_audio, comfyui_generate,
-                // video_assemble, video_compile are DISABLED — they bypass N8N
-                // and try to run the pipeline directly from Railway, which fails
-                // because ComfyUI/AllTalk/Flask only run on the local desktop.
-            ]);
+            return [
+                ...getToolsByName([
+                    "save_script_to_sheets", 
+                    "youtube_script_generator",
+                    "youtube_analytics"
+                ]),
+                ...getMcpToolsByPrefix("mcp_tavily_"),
+                ...getMcpToolsByPrefix("mcp_brave_")
+            ];
 
         case "COMM":
             return [
-                // ── Native tools (always reliable on Railway) ────────────────
                 ...getToolsByName([
-                    "read_gmail",           // PRIMARY Gmail reader — native OAuth2, no MCP needed
-                    "scan_recruiter_emails",
-                    "search_calendar",
-                    "manage_calendar",
-                    "search_web",
+                    "scan_recruiter_emails"
                 ]),
-                // ── MCP tools (supplementary — only available if MCP server starts) ──
+                // ── MCP tools ONLY ──
                 ...getMcpToolsByPrefix("mcp_gmail_"),
                 ...getMcpToolsByPrefix("mcp_tavily_"),
+                ...getMcpToolsByPrefix("mcp_brave_")
             ];
 
         case "SEO_BLOG":
             return [
-                ...getToolsByName(["search_web", "analyze_seo", "browser_agent", "humanize_text"]),
-                ...getMcpToolsByPrefix("mcp_tavily_")
+                ...getToolsByName(["analyze_seo", "humanize_text"]),
+                ...getMcpToolsByPrefix("mcp_tavily_"),
+                ...getMcpToolsByPrefix("mcp_brave_"),
+                ...getMcpToolsByPrefix("mcp_apify_")
             ];
 
         case "APP_FACTORY":
             return [
-                ...getToolsByName(["reddit_scraper", "search_web"]),
-                ...getMcpToolsByPrefix("mcp_tavily_")
+                ...getMcpToolsByPrefix("mcp_tavily_"),
+                ...getMcpToolsByPrefix("mcp_brave_"),
+                ...getMcpToolsByPrefix("mcp_apify_")
             ];
 
         case "LEAD_GEN":
             return [
-                ...getToolsByName(["search_web"]),
-                ...getMcpToolsByPrefix("mcp_gmail_create_draft") // Only draft access
+                ...getMcpToolsByPrefix("mcp_tavily_"),
+                ...getMcpToolsByPrefix("mcp_brave_"),
+                ...getMcpToolsByPrefix("mcp_gmail_create_draft")
             ];
 
         case "ADMIN":
-            return getToolsByName([
-                "run_shell",
-                "read_file",
-                "write_file",
-                "list_directory"
-            ]);
+            return [
+                ...getToolsByName(["run_shell"]),
+                ...getMcpToolsByPrefix("mcp_filesystem_") // If an MCP filesystem is attached
+            ];
 
         default:
             return [];
