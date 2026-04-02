@@ -1,0 +1,61 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "galaxy-demo (Remotion Studio)",
+      "cwd": "C:\\Users\\jcorc\\Documents\\skills\\galaxy-demo",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["remotion", "studio", "--port", "3000"],
+      "port": 3000
+    },
+    {
+      "name": "turbo-plumbing (Remotion Studio)",
+      "cwd": "C:\\Users\\jcorc\\Documents\\skills\\turbo-plumbing",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["remotion", "studio", "--port", "3001"],
+      "port": 3001
+    },
+    {
+      "name": "delcor-media (Remotion Studio)",
+      "cwd": "C:\\Users\\jcorc\\Documents\\skills\\delcor-media",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["remotion", "studio", "--port", "3002"],
+      "port": 3002
+    },
+    {
+      "name": "grace-note (Remotion Studio)",
+      "cwd": "C:\\Users\\jcorc\\Documents\\skills\\grace-note",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["remotion", "studio", "--port", "3004"],
+      "port": 3004
+    },
+    {
+      "name": "jacob-bushman (Remotion Studio)",
+      "cwd": "C:\\Users\\jcorc\\Documents\\skills\\jacob-bushman",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["remotion", "studio", "--port", "3005"],
+      "port": 3005
+    },
+    {
+      "name": "ix-social-media-manager (Remotion Studio)",
+      "cwd": "C:\\Users\\jcorc\\Documents\\skills\\ix-social-media-manager",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["remotion", "studio", "remotion/index.ts", "--port", "3006"],
+      "port": 3006
+    },
+    {
+      "name": "content-creato-studio (Next.js)",
+      "cwd": "C:\\Code\\content-creato-studio",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "task-tribe-android (Vite)",
+      "cwd": "C:\\Code\\Github Projects\\task-tribe-android",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 8080
+    }
+  ]
+}

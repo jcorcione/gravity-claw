@@ -1,0 +1,109 @@
+{
+  "version": 2,
+  "lastComputedDate": "2026-02-16",
+  "dailyActivity": [
+    {
+      "date": "2026-01-18",
+      "messageCount": 608,
+      "sessionCount": 6,
+      "toolCallCount": 129
+    },
+    {
+      "date": "2026-01-19",
+      "messageCount": 116,
+      "sessionCount": 2,
+      "toolCallCount": 8
+    },
+    {
+      "date": "2026-01-20",
+      "messageCount": 696,
+      "sessionCount": 2,
+      "toolCallCount": 135
+    },
+    {
+      "date": "2026-01-21",
+      "messageCount": 42,
+      "sessionCount": 3,
+      "toolCallCount": 10
+    },
+    {
+      "date": "2026-01-28",
+      "messageCount": 15,
+      "sessionCount": 1,
+      "toolCallCount": 2
+    }
+  ],
+  "dailyModelTokens": [
+    {
+      "date": "2026-01-18",
+      "tokensByModel": {
+        "claude-sonnet-4-5-20250929": 1853
+      }
+    },
+    {
+      "date": "2026-01-19",
+      "tokensByModel": {
+        "claude-sonnet-4-5-20250929": 165
+      }
+    },
+    {
+      "date": "2026-01-20",
+      "tokensByModel": {
+        "claude-sonnet-4-5-20250929": 1597
+      }
+    },
+    {
+      "date": "2026-01-21",
+      "tokensByModel": {
+        "claude-sonnet-4-5-20250929": 142
+      }
+    },
+    {
+      "date": "2026-01-28",
+      "tokensByModel": {
+        "claude-opus-4-5-20251101": 9
+      }
+    }
+  ],
+  "modelUsage": {
+    "claude-opus-4-5-20251101": {
+      "inputTokens": 4,
+      "outputTokens": 5,
+      "cacheReadInputTokens": 97598,
+      "cacheCreationInputTokens": 88486,
+      "webSearchRequests": 0,
+      "costUSD": 0,
+      "contextWindow": 0,
+      "maxOutputTokens": 0
+    },
+    "claude-sonnet-4-5-20250929": {
+      "inputTokens": 1447,
+      "outputTokens": 2310,
+      "cacheReadInputTokens": 35974893,
+      "cacheCreationInputTokens": 2836503,
+      "webSearchRequests": 0,
+      "costUSD": 0,
+      "contextWindow": 0,
+      "maxOutputTokens": 0
+    }
+  },
+  "totalSessions": 14,
+  "totalMessages": 1477,
+  "longestSession": {
+    "sessionId": "1430f772-f41c-45c8-a377-a7d29804d0ac",
+    "duration": 67742992,
+    "messageCount": 474,
+    "timestamp": "2026-01-18T21:05:15.530Z"
+  },
+  "firstSessionDate": "2026-01-18T20:22:01.262Z",
+  "hourCounts": {
+    "10": 2,
+    "11": 4,
+    "14": 1,
+    "15": 1,
+    "16": 4,
+    "17": 1,
+    "18": 1
+  },
+  "totalSpeculationTimeSavedMs": 0
+}

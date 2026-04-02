@@ -25,12 +25,12 @@ export function getAgentTools(agent: AgentName): Tool[] {
         case "VIDEO_CONTENT":
             return [
                 ...getToolsByName([
-                    "save_script_to_sheets", 
                     "youtube_script_generator",
                     "youtube_analytics"
                 ]),
                 ...getMcpToolsByPrefix("mcp_tavily_"),
-                ...getMcpToolsByPrefix("mcp_brave_")
+                ...getMcpToolsByPrefix("mcp_brave_"),
+                ...getMcpToolsByPrefix("mcp_galaxyai_")
             ];
 
         case "COMM":

@@ -61,7 +61,6 @@ import { analyzeSeoTool } from "./analyze-seo.js";
 import { checkOpenRouterBalanceTool } from "./check-openrouter-balance.js";
 import { youtubeAnalyticsTool } from "./youtube-analytics.js";
 import { youtubeScriptGeneratorTool } from "./youtube-script-generator.js";
-import { comfyuiGenerateTool } from "./comfyui-generate.js";
 import { elevenlabsAudioTool } from "./elevenlabs-audio.js";
 import { supabaseContentTool } from "./supabase-content.js";
 import { videoCompileTool } from "./video-compile.js";
@@ -74,7 +73,6 @@ import { humanizeTextTool } from "./humanize-text.js";
 import { n8nWebhookTool } from "./n8n-webhook.js";
 import { kokoroAudioTool } from "./kokoro-audio.js";
 import { saveScriptToSupabaseTool } from "./save-script-to-supabase.js";
-import { saveScriptToSheetsTool } from "./save-script-to-sheets.js";
 
 // Prevent multiple registrations if file is re-imported
 if (registry.size === 0) {
@@ -89,7 +87,6 @@ if (registry.size === 0) {
     registerTool(checkOpenRouterBalanceTool);
     registerTool(youtubeAnalyticsTool);
     registerTool(youtubeScriptGeneratorTool);
-    registerTool(comfyuiGenerateTool);
     registerTool(elevenlabsAudioTool);
     registerTool(supabaseContentTool);
     registerTool(videoCompileTool);
@@ -102,5 +99,4 @@ if (registry.size === 0) {
     registerTool(n8nWebhookTool);
     registerTool(kokoroAudioTool);
     registerTool(saveScriptToSupabaseTool);
-    registerTool(saveScriptToSheetsTool);
 }

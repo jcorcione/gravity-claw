@@ -1,0 +1,96 @@
+{
+  "mcpServers": {
+    "n8n-local": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--init",
+        "-e",
+        "MCP_MODE=stdio",
+        "-e",
+        "LOG_LEVEL=error",
+        "-e",
+        "DISABLE_CONSOLE_OUTPUT=true",
+        "-e",
+        "N8N_API_URL=http://host.docker.internal:5678",
+        "-e",
+        "N8N_API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiY2I3NzY1MC0xOTA2LTQxODUtOWYxZS1hODk4ZGI1ZmVlZjYiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzc0Mjg2MDY3fQ.RR5aOcRs88VSCwhzDlFqTrESJCqXQnHB50Xh2xJN4bk",
+        "ghcr.io/czlonkowski/n8n-mcp:latest"
+      ]
+    },
+    "n8n-cloud": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--init",
+        "-e",
+        "MCP_MODE=stdio",
+        "-e",
+        "LOG_LEVEL=error",
+        "-e",
+        "DISABLE_CONSOLE_OUTPUT=true",
+        "-e",
+        "N8N_API_URL=https://gigawerx.app.n8n.cloud",
+        "-e",
+        "N8N_API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyNWZmMzNkOC1iYTJhLTQ0ZjgtOTdkNC03YTQ5YWYyYzQzMDEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzY4NzcwNjc3fQ.Nl0obB4oHw9dZ0_76ZklJ8P4HxHLrhlOl2f-TYHnKqM",
+        "ghcr.io/czlonkowski/n8n-mcp:latest"
+      ]
+    },
+    "google-workspace": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--init",
+        "-v",
+        "C:/Users/jcorc/google-workspace-mcp/credentials.json:/app/credentials.json",
+        "-v",
+        "C:/Users/jcorc/google-workspace-mcp/token.json:/app/token.json",
+        "-e",
+        "GOOGLE_CREDENTIALS_FILE=/app/credentials.json",
+        "-e",
+        "GOOGLE_TOKEN_FILE=/app/token.json",
+        "ghcr.io/taylorwilsdon/google_workspace_mcp:latest",
+        "uv run main.py --transport stdio --single-user"
+      ]
+    },
+    "galaxyai": {
+      "command": "C:\\Users\\jcorc\\AppData\\Roaming\\npm\\mcp-remote.cmd",
+      "args": [
+        "https://app.galaxy.ai/api/mcp",
+        "--header",
+        "Authorization: Bearer gx_2vPKQVPxKCZ4XEpjcTm7NE"
+      ]
+    },
+    "MCP_DOCKER": {
+      "command": "docker",
+      "args": [
+        "mcp",
+        "gateway",
+        "run"
+      ],
+      "env": {
+        "LOCALAPPDATA": "C:\\Users\\jcorc\\AppData\\Local",
+        "ProgramData": "C:\\ProgramData",
+        "ProgramFiles": "C:\\Program Files"
+      }
+    }
+  },
+  "preferences": {
+    "launchPreviewPersistSession": true,
+    "launchPreviewPersistedWorkspaces": [
+      "ad788e9db8cf"
+    ],
+    "allowAllBrowserActions": true,
+    "coworkScheduledTasksEnabled": true,
+    "ccdScheduledTasksEnabled": true,
+    "sidebarMode": "code",
+    "coworkWebSearchEnabled": true,
+    "keepAwakeEnabled": true
+  }
+}
