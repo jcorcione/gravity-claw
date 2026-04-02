@@ -1,6 +1,5 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { getCalendarEvents } from "../src/calendar.js";
-import { searchWebTool } from "../src/tools/search-web.js";
 import { initMcpServers, getMcpTools } from "../src/mcp.js";
 import { getAllUsers, initMemory } from "../src/memory-pg.js";
 
@@ -27,7 +26,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await initMemory();
         await initMcpServers();
         const tools = getMcpTools();
-        const searchTool = tools.find(t => t.name === "mcp_gmail_gmail_list_messages");
+        const searchTool = tools.find(t => t.name.includes("mcp_gmail_gmail") || t.name.includes("mcp_gmail"));
+        const tavilyTool = tools.find(t => t.name.includes("mcp_tavily"));
 
         const users = await getAllUsers();
 
@@ -61,7 +61,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     : "No events scheduled today.";
 
                 // 2. Quick News / Weather via web search
-                const newsContext = await searchWebTool.execute({ query: "top technology and AI news today", maxResults: 3 });
+                let newsContext = "Unable to fetch news.";
+                if (tavilyTool) {
+                    try {
+                        const resRaw = await tavilyTool.execute({ query: "top technology and AI news today" });
+                        newsContext = typeof resRaw === "string" ? resRaw.substring(0, 1000) : JSON.stringify(resRaw).substring(0, 1000);
+                    } catch (e) {
+                        console.log("[Morning Briefing] Failed to fetch news via MCP", e);
+                    }
+                }
 
                 // 3. Unread Emails via MCP
                 let unreadCount = 0;
