@@ -79,7 +79,7 @@ export const config: Readonly<Config> = Object.freeze({
     allowedUserIds: parseUserIds(requireEnv("ALLOWED_USER_IDS")),
     llmModel: process.env["LLM_MODEL"] ?? "anthropic/claude-sonnet-4",
     llmMaxTokens: Number(process.env["LLM_MAX_TOKENS"] ?? "4096"),
-    maxAgentIterations: Number(process.env["MAX_AGENT_ITERATIONS"] ?? "10"),
+    maxAgentIterations: Number(process.env["MAX_AGENT_ITERATIONS"] ?? "20"),
     groqApiKey: process.env["GROQ_API_KEY"] ?? null,
     elevenLabsApiKey: process.env["ELEVENLABS_API_KEY"] ?? null,
     elevenLabsVoiceId: process.env["ELEVENLABS_VOICE_ID"] ?? "JBFqnCBsd6RMkjVDRZzb",
