@@ -73,6 +73,8 @@ import { humanizeTextTool } from "./humanize-text.js";
 import { n8nWebhookTool } from "./n8n-webhook.js";
 import { kokoroAudioTool } from "./kokoro-audio.js";
 import { saveScriptToSupabaseTool } from "./save-script-to-supabase.js";
+import { braveSearchTool } from "./brave-search.js";
+import { notionSearchTool } from "./notion-search.js";
 
 // Prevent multiple registrations if file is re-imported
 if (registry.size === 0) {
@@ -99,4 +101,6 @@ if (registry.size === 0) {
     registerTool(n8nWebhookTool);
     registerTool(kokoroAudioTool);
     registerTool(saveScriptToSupabaseTool);
+    registerTool(braveSearchTool);
+    registerTool(notionSearchTool);
 }
