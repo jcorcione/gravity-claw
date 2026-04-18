@@ -9,10 +9,7 @@ const client = new OpenAI({
 });
 
 const models = [
-    "openai/gpt-4o-mini",
-    "google/gemma-4-31b-it:free",
-    "meta-llama/llama-3.3-70b-instruct:free",
-    "nousresearch/hermes-3-llama-3.1-405b:free"
+    "@preset/free-agentic"
 ];
 
 for (const model of models) {
