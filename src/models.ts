@@ -14,16 +14,12 @@ export interface ModelEntry {
 
 const models: ModelEntry[] = [
     // ── Free Models ────────────────────────────────────────────────────────────
-    { alias: "Auto", modelId: "openrouter/auto", free: true, description: "OpenRouter smart router — picks best available model" },
-    { alias: "Coder", modelId: "qwen/qwen3-coder:free", free: true, description: "Preferred for all code tasks" },
-    { alias: "Flash", modelId: "google/gemma-3-27b-it:free", free: true, description: "Default — fast, excellent tool-calling, no step limit" },
-    { alias: "Google", modelId: "google/gemma-4-31b-it:free", free: true, description: "Strong reasoning fallback" },
-    { alias: "Hermes", modelId: "nousresearch/hermes-3-llama-3.1-405b:free", free: true, description: "Deep reasoning tasks (405b)" },
-    { alias: "GLM", modelId: "z-ai/glm-4.5-air:free", free: true, description: "Agent-centric, thinking + non-thinking modes" },
-    { alias: "GPT", modelId: "openai/gpt-oss-120b:free", free: true, description: "OpenAI open-weight, high reasoning" },
-    { alias: "Kimi", modelId: "moonshotai/kimi-k2.5", free: true, description: "Best free agentic tool-calling (300+ sequential calls) — use for escalation" },
-    { alias: "Llama", modelId: "meta-llama/llama-3.3-70b-instruct:free", free: true, description: "Reliable general-purpose fallback" },
-    { alias: "Trinity", modelId: "arcee-ai/trinity-large-preview:free", free: true, description: "Best for creative writing, scripts, chat" },
+    { alias: "Nemotron", modelId: "nvidia/nemotron-3-super-120b-a12b:free", free: true, description: "Multi-token prediction, AI agents, high efficiency; top free pick" },
+    { alias: "Qwen3Next", modelId: "qwen/qwen3-next-80b-a3b-instruct:free", free: true, description: "Optimized for RAG, tool use, agentic tasks" },
+    { alias: "GptOss", modelId: "openai/gpt-oss-120b:free", free: true, description: "Configurable reasoning depth, native tools/function calling" },
+    { alias: "Trinity", modelId: "arcee-ai/trinity-large-preview:free", free: true, description: "Strong function calling, multi-step workflows, reasoning" },
+    { alias: "Devstral", modelId: "mistralai/pixtral-large-2411:free", free: true, description: "Agentic coding, multi-file orchestration" },
+    { alias: "Auto", modelId: "openrouter/auto", free: true, description: "OpenRouter smart router" },
 
     // ── Paid Models (escalation only) ──────────────────────────────────────────
     { alias: "Haiku", modelId: "anthropic/claude-3-haiku", free: false, description: "Fast Claude — light paid tier" },
@@ -43,7 +39,7 @@ const aliasMap = new Map<string, ModelEntry>(
 let activeModel: ModelEntry =
     models.find((m) => m.modelId === config.llmModel)
     ?? aliasMap.get(config.llmModel.toLowerCase())
-    ?? aliasMap.get("flash")   // Default: Flash (fast, free, stable)
+    ?? aliasMap.get("nemotron")   // Default: Nemotron (fast, free, stable top pick)
     ?? models[0];
 
 export function getActiveModel(): ModelEntry {
@@ -74,14 +70,14 @@ export function formatModelList(): string {
 }
 
 export function getFallbackSmarterModel(): ModelEntry {
-    // Use kimi-k2 as free escalation target — best agentic tool-calling on free tier
-    return aliasMap.get("kimi") ?? aliasMap.get("sonnet") ?? models.find(m => !m.free) ?? models[0];
+    // Use Nemotron/GptOss as free escalation target — prominent tool-calling
+    return aliasMap.get("gptoss") ?? aliasMap.get("nemotron") ?? models.find(m => !m.free) ?? models[0];
 }
 
 export function resetToDefaultModel(): void {
     activeModel =
         models.find((m) => m.modelId === config.llmModel)
         ?? aliasMap.get(config.llmModel.toLowerCase())
-        ?? aliasMap.get("flash")   // Default: Flash
+        ?? aliasMap.get("nemotron")   // Default: Nemotron
         ?? models[0];
 }
