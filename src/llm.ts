@@ -114,8 +114,8 @@ function getFreeRotation(): string[] {
 // Router needs fast, precise instruction followers.
 // Use 70B models for routing logic to ensure complex intents are caught.
 const ROUTER_MODEL_ROTATION = [
-    "meta-llama/llama-3.3-70b-instruct:free",       // FREE — Very precise routing
-    "google/gemma-3-27b-it:free",                   // FREE — Fast fallback
+    "nvidia/nemotron-3-super-120b-a12b:free",       // FREE — Very precise routing (120B)
+    "qwen/qwen3-next-80b-a3b-instruct:free",        // FREE — Fast agentic fallback (80B)
     "anthropic/claude-3.5-sonnet",                  // PAID — Bulletproof routing/memory
     "openai/gpt-4o-mini",                           // PAID — Fast, cheap fallback
 ];
