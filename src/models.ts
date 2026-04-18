@@ -15,14 +15,14 @@ export interface ModelEntry {
 const models: ModelEntry[] = [
     // ── Free Models ────────────────────────────────────────────────────────────
     { alias: "Auto", modelId: "openrouter/auto", free: true, description: "OpenRouter smart router — picks best available model" },
-    { alias: "Coder", modelId: "qwen/qwen-3-coder-480b-a35b:free", free: true, description: "Preferred for all code tasks" },
+    { alias: "Coder", modelId: "qwen/qwen3-coder:free", free: true, description: "Preferred for all code tasks" },
     { alias: "Flash", modelId: "google/gemma-3-27b-it:free", free: true, description: "Default — fast, excellent tool-calling, no step limit" },
-    { alias: "Gemini", modelId: "google/gemini-2.5-flash-preview", free: true, description: "Strong reasoning fallback" },
-    { alias: "Genius", modelId: "deepseek/deepseek-r1-0528:free", free: true, description: "Deep reasoning tasks" },
+    { alias: "Google", modelId: "google/gemma-4-31b-it:free", free: true, description: "Strong reasoning fallback" },
+    { alias: "Hermes", modelId: "nousresearch/hermes-3-llama-3.1-405b:free", free: true, description: "Deep reasoning tasks (405b)" },
     { alias: "GLM", modelId: "z-ai/glm-4.5-air:free", free: true, description: "Agent-centric, thinking + non-thinking modes" },
     { alias: "GPT", modelId: "openai/gpt-oss-120b:free", free: true, description: "OpenAI open-weight, high reasoning" },
-    { alias: "Kimi", modelId: "moonshotai/kimi-k2:free", free: true, description: "Best free agentic tool-calling (300+ sequential calls) — use for escalation" },
-    { alias: "Llama", modelId: "meta-llama/llama-3.1-8b-instruct:free", free: true, description: "Reliable general-purpose fallback" },
+    { alias: "Kimi", modelId: "moonshotai/kimi-k2.5", free: true, description: "Best free agentic tool-calling (300+ sequential calls) — use for escalation" },
+    { alias: "Llama", modelId: "meta-llama/llama-3.3-70b-instruct:free", free: true, description: "Reliable general-purpose fallback" },
     { alias: "Trinity", modelId: "arcee-ai/trinity-large-preview:free", free: true, description: "Best for creative writing, scripts, chat" },
 
     // ── Paid Models (escalation only) ──────────────────────────────────────────
