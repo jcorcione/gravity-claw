@@ -75,6 +75,7 @@ import { kokoroAudioTool } from "./kokoro-audio.js";
 import { saveScriptToSupabaseTool } from "./save-script-to-supabase.js";
 import { braveSearchTool } from "./brave-search.js";
 import { notionSearchTool } from "./notion-search.js";
+import { saveLeadsToSheetTool } from "./save-leads-to-sheet.js";
 
 // Prevent multiple registrations if file is re-imported
 if (registry.size === 0) {
@@ -103,4 +104,5 @@ if (registry.size === 0) {
     registerTool(saveScriptToSupabaseTool);
     registerTool(braveSearchTool);
     registerTool(notionSearchTool);
+    registerTool(saveLeadsToSheetTool);
 }

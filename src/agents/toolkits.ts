@@ -61,9 +61,13 @@ export function getAgentTools(agent: AgentName): Tool[] {
 
         case "LEAD_GEN":
             return [
+                ...getToolsByName([
+                    "brave_search",          // native Brave web search
+                    "save_leads_to_sheet",   // create Google Sheet in Drive + write leads
+                ]),
                 ...getMcpToolsByPrefix("mcp_tavily_"),
                 ...getMcpToolsByPrefix("mcp_brave_"),
-                ...getMcpToolsByPrefix("mcp_gmail_create_draft")
+                ...getMcpToolsByPrefix("mcp_gmail_create_draft"),
             ];
 
         case "ADMIN":
