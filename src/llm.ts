@@ -105,19 +105,21 @@ import { getAllModels } from "./models.js";
 
 function getFreeRotation(): string[] {
     const freeModels = getAllModels()
-        .filter(m => m.free && m.modelId !== "openrouter/auto")
+        .filter(m => m.free)
         .map(m => m.modelId);
     // Always end with a reliable paid fallback
     return [...freeModels, "openai/gpt-4o-mini", "anthropic/claude-3-haiku"];
 }
 
 // Router needs fast, precise instruction followers.
-// Use 70B models for routing logic to ensure complex intents are caught.
+// Sourced from models.ts registry — openrouter/auto:free is the smart free router.
 const ROUTER_MODEL_ROTATION = [
-    "nvidia/nemotron-3-super-120b-a12b:free",       // FREE — Very precise routing (120B)
-    "qwen/qwen3-next-80b-a3b-instruct:free",        // FREE — Fast agentic fallback (80B)
-    "anthropic/claude-3.5-sonnet",                  // PAID — Bulletproof routing/memory
-    "openai/gpt-4o-mini",                           // PAID — Fast, cheap fallback
+    "openrouter/auto:free",                         // FREE — OpenRouter picks best available dynamically
+    "nvidia/nemotron-3-super-120b-a12b:free",       // FREE — 576B MoE, #1 agentic ranked
+    "openai/gpt-oss-120b:free",                     // FREE — 145B agentic tool use
+    "qwen/qwen3-next-80b-a3b-instruct:free",        // FREE — 80B agentic fallback
+    "anthropic/claude-3.5-sonnet",                  // PAID — bulletproof fallback
+    "openai/gpt-4o-mini",                           // PAID — fast cheap last resort
 ];
 
 // ─── Router Logic ─────────────────────────────────────────
