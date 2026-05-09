@@ -1,15 +1,13 @@
-how is<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>AgenticHQ — Multi-Agent Interface</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="style.css">
-    <!-- Google Fonts for a sleek modern look -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -23,92 +21,110 @@ how is<!DOCTYPE html>
                     <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                 </svg>
             </div>
-            <!-- Login Form -->
             <div id="login-form">
-                <input type="email" id="login-email" placeholder="Email Address" autocomplete="email"
-                    class="auth-input">
-                <input type="password" id="login-password" placeholder="Password" autocomplete="current-password"
-                    class="auth-input">
+                <input type="email" id="login-email" placeholder="Email Address" autocomplete="email" class="auth-input">
+                <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" class="auth-input">
                 <button id="login-btn" class="auth-btn">SIGN IN</button>
                 <p class="toggle-auth">Need an account? <span id="show-register">Register here</span></p>
             </div>
-
-            <!-- Register Form -->
             <div id="register-form" style="display: none;">
                 <input type="text" id="reg-name" placeholder="Full Name" autocomplete="name" class="auth-input">
                 <input type="email" id="reg-email" placeholder="Email Address" autocomplete="email" class="auth-input">
-                <input type="password" id="reg-password" placeholder="Create Password" autocomplete="new-password"
-                    class="auth-input">
+                <input type="password" id="reg-password" placeholder="Create Password" autocomplete="new-password" class="auth-input">
                 <button id="register-btn" class="auth-btn">CREATE ACCOUNT</button>
                 <p class="toggle-auth">Already have an account? <span id="show-login">Sign in</span></p>
             </div>
-
             <div id="auth-error"></div>
             <div style="margin-top: 20px; border-top: 1px solid var(--border-dim); padding-top: 10px;">
-                <a href="admin.html" style="color: var(--text-muted); font-size: 0.8rem; text-decoration: none;">🔒
-                    Admin Use Only</a>
+                <a href="admin.html" style="color: var(--text-muted); font-size: 0.8rem; text-decoration: none;">🔒 Admin Use Only</a>
             </div>
         </div>
     </div>
 
-    <!-- Main Chat Interface (Hidden initially) -->
+    <!-- Main Chat Interface -->
     <div id="chat-app">
+
+        <!-- Mobile header bar -->
+        <div class="mobile-topbar">
+            <button id="hamburger-btn" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
+            <span class="mobile-title">AgenticHQ</span>
+            <button id="mobile-logout-btn" style="background:none;border:none;color:var(--text-muted);font-size:0.8rem;cursor:pointer;">Sign Out</button>
+        </div>
+
+        <!-- Sidebar overlay (mobile) -->
+        <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
         <!-- Agent Roster Sidebar -->
-        <div class="sidebar">
-            <div class="sidebar-header" style="padding: 20px; border-bottom: 1px solid var(--border-dim);">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <div class="status-indicator"></div>
-                    <h3 style="letter-spacing: 1px;">AgenticHQ</h3>
+                    <h3>AgenticHQ</h3>
                 </div>
-                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top:5px;">Multi-Agent Roster</p>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">Multi-Agent Roster — click to try</p>
             </div>
             <ul class="agent-list">
-                <li class="agent-item"><span class="agent-icon">🧠</span>
+                <li class="agent-item" data-prompt="What's on my agenda today? Check my calendar and give me a quick summary." tabindex="0" role="button">
+                    <span class="agent-icon">🧠</span>
                     <div>
                         <h4>Manager</h4>
                         <p>High-Level Routing</p>
                     </div>
+                    <span class="agent-arrow">›</span>
                 </li>
-                <li class="agent-item"><span class="agent-icon">🎬</span>
+                <li class="agent-item" data-prompt="/video Create a short YouTube script about the top 3 AI tools blowing up right now. Make it punchy, 15 seconds max." tabindex="0" role="button">
+                    <span class="agent-icon">🎬</span>
                     <div>
                         <h4>Video Content</h4>
-                        <p>YouTube & Media</p>
+                        <p>YouTube &amp; Media</p>
                     </div>
+                    <span class="agent-arrow">›</span>
                 </li>
-                <li class="agent-item"><span class="agent-icon">📧</span>
+                <li class="agent-item" data-prompt="/comm Scan my Gmail for recruiter emails from the last 2 days and give me a summary of any good opportunities." tabindex="0" role="button">
+                    <span class="agent-icon">📧</span>
                     <div>
                         <h4>Communications</h4>
-                        <p>Gmail & Calendar</p>
+                        <p>Gmail &amp; Calendar</p>
                     </div>
+                    <span class="agent-arrow">›</span>
                 </li>
-                <li class="agent-item"><span class="agent-icon">✍️</span>
+                <li class="agent-item" data-prompt="/seo Write a blog post about AI automation for small businesses for delcormedia.com and humanize it so it doesn't sound like AI." tabindex="0" role="button">
+                    <span class="agent-icon">✍️</span>
                     <div>
-                        <h4>SEO & Blog</h4>
-                        <p>Analysis & Copy</p>
+                        <h4>SEO &amp; Blog</h4>
+                        <p>Analysis &amp; Copy</p>
                     </div>
+                    <span class="agent-arrow">›</span>
                 </li>
-                <li class="agent-item"><span class="agent-icon">💡</span>
+                <li class="agent-item" data-prompt="/app Scrape the r/SaaS subreddit and find the most painful problems people are complaining about. Give me 5 micro-SaaS ideas." tabindex="0" role="button">
+                    <span class="agent-icon">💡</span>
                     <div>
                         <h4>App Factory</h4>
                         <p>Reddit Ideation</p>
                     </div>
+                    <span class="agent-arrow">›</span>
                 </li>
-                <li class="agent-item"><span class="agent-icon">🤝</span>
+                <li class="agent-item" data-prompt="/lead Search for small businesses in Clearwater, Florida with no website or weak online presence. Find at least 10 leads and save them to a Google Sheet." tabindex="0" role="button">
+                    <span class="agent-icon">🤝</span>
                     <div>
                         <h4>Lead Gen</h4>
-                        <p>Outreach & Hunting</p>
+                        <p>Outreach &amp; Hunting</p>
                     </div>
+                    <span class="agent-arrow">›</span>
                 </li>
-                <li class="agent-item"><span class="agent-icon">⚙️</span>
+                <li class="agent-item" data-prompt="/admin Show me the last 20 lines of the server log." tabindex="0" role="button">
+                    <span class="agent-icon">⚙️</span>
                     <div>
                         <h4>Admin DevOps</h4>
                         <p>System Files</p>
                     </div>
+                    <span class="agent-arrow">›</span>
                 </li>
             </ul>
             <div style="padding: 15px; border-top: 1px solid var(--border-dim); text-align: center;">
-                <a href="#" id="about-link" style="color: var(--accent); font-size: 0.85rem; text-decoration: none;">ℹ️
-                    About & How to Use</a>
+                <a href="#" id="about-link" style="color: var(--accent); font-size: 0.85rem; text-decoration: none;">ℹ️ About &amp; How to Use</a>
             </div>
         </div>
 
@@ -117,45 +133,29 @@ how is<!DOCTYPE html>
             <header>
                 <div class="header-content">
                     <h2>Active Session</h2>
-                    <button id="logout-btn"
-                        style="background:var(--bg-secondary); color:var(--text-secondary); border:1px solid var(--border-color); padding:4px 8px; border-radius:4px; font-size:12px; cursor:pointer;">Sign
-                        Out</button>
                 </div>
+                <button id="logout-btn" style="background:var(--bg-secondary);color:var(--text-muted);border:1px solid var(--border-dim);padding:4px 10px;border-radius:4px;font-size:12px;cursor:pointer;">Sign Out</button>
             </header>
 
             <main id="chat-window">
                 <div class="message system-msg">
-                    <div class="msg-content">
-                        Identity verified. AgenticHQ router sequence initiated.
-                    </div>
+                    <div class="msg-content">Identity verified. AgenticHQ router sequence initiated.</div>
                 </div>
-
                 <div class="message bot-msg" id="splash-message">
-                    <div class="msg-content"
-                        style="background: rgba(99, 102, 241, 0.05); border: 1px solid var(--border-dim); border-left: 4px solid var(--accent); padding: 20px;">
+                    <div class="msg-content" style="background: rgba(99,102,241,0.05); border: 1px solid var(--border-dim); border-left: 4px solid var(--accent); padding: 18px;">
                         <h3 style="margin-bottom: 10px; color: var(--accent);">Welcome to AgenticHQ 🚀</h3>
-                        <p style="margin-bottom: 15px; font-size: 0.95rem; line-height: 1.5;">
-                            AgenticHQ is a multi-agent system. You are talking to the <strong>Manager</strong>, which
-                            will automatically route your request to the right specialized expert below:
+                        <p style="margin-bottom: 12px; font-size: 0.95rem; line-height: 1.5;">
+                            You're talking to the <strong>Manager</strong>. Click any agent in the sidebar to load an example, or type your own request below.
                         </p>
-                        <ul
-                            style="margin-left: 20px; font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 15px;">
-                            <li><strong>Video Content:</strong> "Create a short video script about the Roman Empire."
-                            </li>
-                            <li><strong>Communications:</strong> "Scan my Gmail for recruiter emails from yesterday."
-                            </li>
-                            <li><strong>SEO & Blog:</strong> "Write a blog post about AI for jcorcione.com and humanize
-                                it."</li>
-                            <li><strong>App Factory:</strong> "Scrape the r/SaaS subreddit and find painful problems to
-                                solve."</li>
-                            <li><strong>Lead Gen:</strong> "Draft a cold outreach email for freelance PM roles."</li>
+                        <ul style="margin-left: 18px; font-size: 0.88rem; color: var(--text-muted); line-height: 1.7;">
+                            <li><strong>Video Content:</strong> "/video Create a YouTube Short about AI tools."</li>
+                            <li><strong>Communications:</strong> "/comm Scan Gmail for recruiter emails."</li>
+                            <li><strong>SEO &amp; Blog:</strong> "/seo Write a blog post about AI for delcormedia.com."</li>
+                            <li><strong>App Factory:</strong> "/app Scrape r/SaaS for painful problems."</li>
+                            <li><strong>Lead Gen:</strong> "/lead Find businesses in Clearwater FL with no website."</li>
                         </ul>
-                        <p style="font-size: 0.85rem; color: var(--text-muted); font-style: italic;">
-                            Just type your request in the box below to get started!
-                        </p>
                     </div>
                 </div>
-                <!-- Dynamic messages will be appended here -->
             </main>
 
             <div class="input-area">
@@ -169,14 +169,46 @@ how is<!DOCTYPE html>
                 </button>
             </div>
             <div class="legal-footer">
-                &copy; 2026 AgenticHQ Solutions. All Rights Reserved. Proprietary & Confidential. <a href="#">Terms of
-                    Service</a>
+                &copy; 2026 AgenticHQ Solutions. All Rights Reserved. Proprietary &amp; Confidential. <a href="#">Terms of Service</a>
             </div>
-        </div> <!-- End chat-main -->
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="app.js"></script>
+    <script>
+        // ── Sidebar click-to-fill ────────────────────────────
+        document.querySelectorAll('.agent-item[data-prompt]').forEach(item => {
+            const fill = () => {
+                const input = document.getElementById('prompt-input');
+                if (!input) return;
+                input.value = item.dataset.prompt;
+                input.focus();
+                input.dispatchEvent(new Event('input'));
+                // close sidebar on mobile
+                document.getElementById('sidebar').classList.remove('open');
+                document.getElementById('sidebar-overlay').classList.remove('open');
+            };
+            item.addEventListener('click', fill);
+            item.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') fill(); });
+        });
+
+        // ── Hamburger menu ───────────────────────────────────
+        const hamburger = document.getElementById('hamburger-btn');
+        const sidebar   = document.getElementById('sidebar');
+        const overlay   = document.getElementById('sidebar-overlay');
+        const toggle = () => {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+        };
+        hamburger?.addEventListener('click', toggle);
+        overlay?.addEventListener('click', toggle);
+
+        // ── Mobile sign out ──────────────────────────────────
+        document.getElementById('mobile-logout-btn')?.addEventListener('click', () => {
+            document.getElementById('logout-btn')?.click();
+        });
+    </script>
 </body>
 
 </html>
