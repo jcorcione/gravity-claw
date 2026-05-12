@@ -17,3 +17,4 @@ messages_dup_check.txt
 metaclaw_inspect/
 alltalk_openapi.json
 test_alltalk.ts
+test_openrouter.ts

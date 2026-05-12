@@ -1,8 +1,7 @@
 /**
- * One-time OAuth2 Token Generator for Google (Gmail, Sheets, Calendar)
+ * One-time OAuth2 Token Generator for Google (Gmail, Sheets, Calendar, Drive)
  * Run: npx tsx get-google-token.ts
- * Paste the Client ID + Client Secret from Google Cloud Console when prompted.
- * It will open your browser to authorize, then print your REFRESH_TOKEN.
+ * It will open your browser to authorize, then auto-save GOOGLE_REFRESH_TOKEN to .env
  */
 
 import { google } from "googleapis";
@@ -25,6 +24,7 @@ const SCOPES = [
     "https://www.googleapis.com/auth/gmail.modify",
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/calendar",
+    "https://www.googleapis.com/auth/drive.file",  // needed to create new Sheets in Drive
 ];
 
 const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
